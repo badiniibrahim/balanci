@@ -1,3 +1,4 @@
+import DialogAction from "@/components/shared/DialogAction";
 import {
   Table,
   TableBody,
@@ -9,6 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Budget } from "@prisma/client";
 import { Calendar, DollarSign } from "lucide-react";
+import { DeleteIncome } from "../_actions/deleteIncome";
+import { useDeleteMutation } from "@/hooks/useDeleteMutation";
 
 type Props = {
   budgets: Budget[];
@@ -16,6 +19,8 @@ type Props = {
 
 export function IncomeTable({ budgets = [] }: Props) {
   const totalAmount = budgets.reduce((sum, budget) => sum + budget.amount, 0);
+
+  const deleteMutation = useDeleteMutation("income", DeleteIncome);
 
   return (
     <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
@@ -30,6 +35,9 @@ export function IncomeTable({ budgets = [] }: Props) {
             </TableHead>
             <TableHead className="py-3 px-5 text-right font-semibold">
               <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount
+            </TableHead>
+            <TableHead className="py-3 px-5 text-center font-semibold">
+              Actions
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -47,6 +55,15 @@ export function IncomeTable({ budgets = [] }: Props) {
               </TableCell>
               <TableCell className="py-3 px-5 text-right text-gray-800 font-semibold">
                 ${budget.amount.toFixed(2)}
+              </TableCell>
+
+              <TableCell className="py-3 px-5 text-center">
+                <DialogAction
+                  entityName={budget.name}
+                  entityId={budget.id}
+                  entityType="income"
+                  deleteMutation={deleteMutation}
+                />
               </TableCell>
             </TableRow>
           ))}
