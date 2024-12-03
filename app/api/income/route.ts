@@ -1,0 +1,25 @@
+import { NextResponse } from "next/server";
+import prisma from "@/prisma/prisma";
+import { currentUser } from "@clerk/nextjs/server";
+
+export async function GET() {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const incomes = await prisma.budget.findMany({
+      where: { clerkId: user?.id },
+      orderBy: { date: "asc" },
+    });
+
+    return NextResponse.json(incomes);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}

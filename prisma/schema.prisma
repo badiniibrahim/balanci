@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  budgets          Budget[]
+  fixedExpenses    FixedExpense[]
+  variableExpenses VariableExpense[]
+  budgetRules      BudgetRule[]
+  userSettings     UserSettings[]
+}
+
+model UserSettings {
+  id        Int      @id @default(autoincrement())
+  currency  String
+  userId    Int?
+  clerkId   String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Budget {
+  id        Int      @id @default(autoincrement())
+  name      String
+  date      DateTime @default(now())
+  amount    Float
+  updatedAt DateTime @updatedAt
+  clerkId   String
+  createdAt DateTime @default(now())
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model FixedExpense {
+  id           Int      @id @default(autoincrement())
+  name         String
+  dueDate      DateTime
+  budgetAmount Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  clerkId      String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VariableExpense {
+  id           Int      @id @default(autoincrement())
+  name         String
+  budgetAmount Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  clerkId      String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BudgetRule {
+  id                Int    @id @default(autoincrement())
+  needsPercentage   Float  @default(50)
+  wantsPercentage   Float  @default(30)
+  savingsPercentage Float  @default(20)
+  clerkId           String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
