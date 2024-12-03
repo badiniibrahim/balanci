@@ -64,7 +64,7 @@ function IncomePage() {
         />
       </div>
       <Suspense fallback={<UserIncomeSkeleton />}>
-        <UserIncome incomes={incomes} />
+        <UserIncome incomes={incomes.incomes} currency={incomes.currency} />
       </Suspense>
     </div>
   );

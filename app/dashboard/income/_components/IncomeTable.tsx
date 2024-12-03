@@ -12,15 +12,21 @@ import { Budget } from "@prisma/client";
 import { Calendar, DollarSign } from "lucide-react";
 import { DeleteIncome } from "../_actions/deleteIncome";
 import { useDeleteMutation } from "@/hooks/useDeleteMutation";
+import { useMemo } from "react";
+import { GetFormatterForCurrency } from "@/lib/helpers";
 
 type Props = {
   budgets: Budget[];
+  currency: string;
 };
 
-export function IncomeTable({ budgets = [] }: Props) {
+export function IncomeTable({ budgets = [], currency }: Props) {
   const totalAmount = budgets.reduce((sum, budget) => sum + budget.amount, 0);
 
   const deleteMutation = useDeleteMutation("income", DeleteIncome);
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(currency);
+  }, [currency]);
 
   return (
     <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
@@ -54,7 +60,7 @@ export function IncomeTable({ budgets = [] }: Props) {
                 {new Date(budget.date).toLocaleDateString()}
               </TableCell>
               <TableCell className="py-3 px-5 text-right text-gray-800 font-semibold">
-                ${budget.amount.toFixed(2)}
+                {formatter.format(budget.amount)}
               </TableCell>
 
               <TableCell className="py-3 px-5 text-center">

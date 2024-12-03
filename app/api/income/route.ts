@@ -9,12 +9,32 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const incomes = await prisma.budget.findMany({
-      where: { clerkId: user?.id },
-      orderBy: { date: "asc" },
+    const existingUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
     });
 
-    return NextResponse.json(incomes);
+    if (existingUser) {
+      const userSettings = await prisma.userSettings.findUnique({
+        where: {
+          id: existingUser.id,
+        },
+      });
+
+      const incomes = await prisma.budget.findMany({
+        where: { clerkId: user?.id },
+        orderBy: { date: "asc" },
+      });
+
+      const currency = userSettings?.currency || "USD";
+
+      return Response.json({
+        incomes: incomes,
+        currency,
+      });
+    }
+
+    return Response.json({ error: "User not found" }, { status: 404 });
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return NextResponse.json(

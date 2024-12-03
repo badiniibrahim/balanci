@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="light" style={{ colorScheme: "light" }}>
+      <html lang="en" className="dark" style={{ colorScheme: "light" }}>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >

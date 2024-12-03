@@ -16,9 +16,13 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await currentUser();
+
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const existingUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
 
     const updatedSettings = await prisma.userSettings.update({
       where: { clerkId: user.id },

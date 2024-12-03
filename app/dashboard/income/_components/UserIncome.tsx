@@ -7,9 +7,10 @@ import { IncomeTable } from "./IncomeTable";
 
 type Props = {
   incomes: Budget[];
+  currency: string;
 };
 
-function UserIncome({ incomes }: Props) {
+function UserIncome({ incomes, currency }: Props) {
   if (!incomes) {
     return (
       <>
@@ -45,7 +46,7 @@ function UserIncome({ incomes }: Props) {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 mt-5">
-        <IncomeTable budgets={incomes} />
+        <IncomeTable budgets={incomes} currency={currency} />
       </div>
     </>
   );
