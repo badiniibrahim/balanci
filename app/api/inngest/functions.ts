@@ -21,13 +21,24 @@ export const createUser = inngest.createFunction(
       });
 
       if (existingUser == null) {
-        await prisma.user.create({
+        const newUser = await prisma.user.create({
           data: {
             clerkId: user.id,
             email: email,
             name: fullName,
           },
         });
+        if (newUser) {
+          await prisma.budgetRule.create({
+            data: {
+              needsPercentage: 50,
+              wantsPercentage: 30,
+              savingsPercentage: 20,
+              clerkId: user.id,
+              userId: newUser.id,
+            },
+          });
+        }
       }
     });
     return "Success";
