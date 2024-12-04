@@ -7,10 +7,16 @@ import { useQuery } from "@tanstack/react-query";
 import Balance from "./_components/Balance";
 import BalanceChart from "./_components/BalanceChart";
 import PieBalanceChart from "./_components/PieBalanceChart";
+import {
+  LayoutDashboard,
+  DollarSign,
+  Shield,
+  UserCircle,
+  FileText,
+} from "lucide-react";
+import FixedExpenseCard from "./_components/FixedExpenseCard";
 
 function DashboardPage() {
-
-
   const { data: balance } = useQuery({
     queryKey: ["balance"],
     queryFn: () =>
@@ -22,12 +28,16 @@ function DashboardPage() {
       }).then((res) => res.json()),
   });
 
- 
+  console.log({ balance });
+
   return (
     <div>
       <div className="flex flex-wrap lg:flex-nowrap justify-center">
-        <Balance balance={balance}/>
+        <Balance balance={balance} />
         <div className="flex m-3 flex-wrap justify-center gap-5 items-center ">
+          {/*<div className="grid grid-cols-4 gap-5">
+            <FixedExpenseCard balance={balance} />
+          </div>*/}
           {earningData.map((item) => (
             <div
               key={item.title}
@@ -52,7 +62,7 @@ function DashboardPage() {
         </div>
       </div>
       <div className="flex gap-10 flex-wrap justify-center">
-        <BalanceChart balance={balance}/>
+        <BalanceChart balance={balance} />
         <div>
           <div
             className=" rounded-2xl md:w-400 p-4 m-3"

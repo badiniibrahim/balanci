@@ -13,25 +13,34 @@ export async function GET() {
   });
 
   if (existingUser) {
-    const userSettings = await prisma.userSettings.findUnique({
-      where: {
-        id: existingUser.id,
-      },
-    });
-
-    const totalBudget = await prisma.budget.aggregate({
-      where: {
-        userId: existingUser.id,
-      },
-      _sum: {
-        amount: true,
-      },
-    });
+    // Lancer les requêtes en parallèle
+    const [userSettings, totalBudget, totalExpense] = await Promise.all([
+      prisma.userSettings.findUnique({
+        where: { id: existingUser.id },
+      }),
+      prisma.budget.aggregate({
+        where: {
+          userId: existingUser.id,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      prisma.fixedExpense.aggregate({
+        where: {
+          userId: existingUser.id,
+        },
+        _sum: {
+          budgetAmount: true,
+        },
+      }),
+    ]);
 
     const currency = userSettings?.currency || "USD";
 
     return Response.json({
-      total: totalBudget._sum.amount || 0,
+      income: totalBudget._sum.amount || 0,
+      expense: totalExpense._sum.budgetAmount || 0,
       currency,
     });
   }
