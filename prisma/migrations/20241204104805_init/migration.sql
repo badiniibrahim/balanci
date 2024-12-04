@@ -30,6 +30,7 @@ CREATE TABLE "Budget" (
     "amount" DOUBLE PRECISION NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "clerkId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" INTEGER,
 
     CONSTRAINT "Budget_pkey" PRIMARY KEY ("id")
@@ -79,6 +80,9 @@ CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserSettings_clerkId_key" ON "UserSettings"("clerkId");
 
 -- AddForeignKey
 ALTER TABLE "UserSettings" ADD CONSTRAINT "UserSettings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

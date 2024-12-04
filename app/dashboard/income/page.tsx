@@ -56,7 +56,7 @@ function IncomePage() {
           trigger={
             <Button
               variant={"outline"}
-              className="hover:bg-primary/55 hover:text-white"
+              className="hover:bg-primary/55 hover:text-white bg-primary"
             >
               Add new income
             </Button>

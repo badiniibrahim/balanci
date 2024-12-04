@@ -33,9 +33,9 @@ function UserIncome({ incomes, currency }: Props) {
             <InboxIcon size={40} className="stroke-primary" />
           </div>
           <div className="flex flex-col gap-1 text-center">
-            <p className="font-bold">No workflow created yet</p>
+            <p className="font-bold">No income created yet</p>
             <p className="text-sm text-muted-foreground">
-              Click the button below to create your first workflow
+              Click the button below to add your first income
             </p>
           </div>
         </div>
