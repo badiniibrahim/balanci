@@ -5,7 +5,8 @@ type DeleteFunction = (id: number) => Promise<void>;
 
 export function useDeleteMutation(
   entityType: string,
-  deleteFn: DeleteFunction
+  deleteFn: DeleteFunction,
+  queryKey:string
 ) {
   const queryClient = useQueryClient();
 
@@ -13,7 +14,7 @@ export function useDeleteMutation(
     mutationFn: deleteFn,
     onSuccess: (_, id) => {
       toast.success(`${entityType} deleted successfully`, { id });
-      queryClient.invalidateQueries({ queryKey: ["fetchIncome"] });
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
     },
     onError: () => {
       toast.error("Something went wrong");

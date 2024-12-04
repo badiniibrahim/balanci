@@ -8,26 +8,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Budget } from "@prisma/client";
 import { Calendar, DollarSign } from "lucide-react";
-import { DeleteIncome } from "../_actions/deleteIncome";
 import { useDeleteMutation } from "@/hooks/useDeleteMutation";
 import { useMemo } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
+import { DeleteFixedExpenses } from "../_actions/deleteFixedExpenses";
+import { FixedExpense } from "@prisma/client";
 
 type Props = {
-  budgets: Budget[];
+  fixedExpenses: FixedExpense[];
   currency: string;
 };
 
-export function IncomeTable({ budgets = [], currency }: Props) {
-  const totalAmount = budgets.reduce((sum, budget) => sum + budget.amount, 0);
+export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
+  const totalAmount = fixedExpenses.reduce(
+    (sum, budget) => sum + budget.budgetAmount,
+    0
+  );
 
   const deleteMutation = useDeleteMutation(
-    "income",
-    DeleteIncome,
-    "fetchIncome"
+    "fixed expenses",
+    DeleteFixedExpenses,
+    "fetchFixedExpenses"
   );
+
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(currency);
   }, [currency]);
@@ -52,7 +56,7 @@ export function IncomeTable({ budgets = [], currency }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {budgets.map((budget) => (
+          {fixedExpenses.map((budget) => (
             <TableRow
               key={budget.id}
               className="transition hover:bg-blue-50 hover:shadow-inner"
@@ -61,10 +65,10 @@ export function IncomeTable({ budgets = [], currency }: Props) {
                 {budget.name}
               </TableCell>
               <TableCell className="py-3 px-5 text-gray-600">
-                {new Date(budget.date).toLocaleDateString()}
+                {new Date(budget.createdAt).toLocaleDateString()}
               </TableCell>
               <TableCell className="py-3 px-5 text-right text-gray-800 font-semibold">
-                {formatter.format(budget.amount)}
+                {formatter.format(budget.budgetAmount)}
               </TableCell>
 
               <TableCell className="py-3 px-5 text-center">

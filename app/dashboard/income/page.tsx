@@ -17,7 +17,7 @@ const fetchIncome = async () => {
     },
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch courses");
+    throw new Error("Failed to fetch income");
   }
   return response.json();
 };
