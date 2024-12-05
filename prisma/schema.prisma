@@ -93,12 +93,16 @@ model VariableExpense {
 }
 
 model BudgetRule {
-  id                Int    @id @default(autoincrement())
-  needsPercentage   Float  @default(50)
-  wantsPercentage   Float  @default(30)
-  savingsPercentage Float  @default(20)
-  clerkId           String
+  id                      Int    @id @default(autoincrement())
+  needsPercentage         Float  @default(50)
+  savingsPercentage       Float  @default(30)
+  wantsPercentage         Float  @default(20)
+  actualNeedsPercentage   Float  @default(0)
+  actualSavingsPercentage Float  @default(0)
+  actualWantsPercentage   Float  @default(0)
+  clerkId                 String
+  userId                  Int
+  user                    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([clerkId, userId])
 }

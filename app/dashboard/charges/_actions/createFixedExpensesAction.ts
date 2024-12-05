@@ -5,10 +5,10 @@ import { FixedExpensesSchema, FixedExpensesType } from "@/schema/fixedExpenses";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-export async function CreateFixedExpenses(from: FixedExpensesType) {
-  const { success, data } = FixedExpensesSchema.safeParse(from);
+export async function CreateFixedExpenses(form: FixedExpensesType) {
+  const { success, data } = FixedExpensesSchema.safeParse(form);
   if (!success) {
-    throw new Error("invalid form data");
+    throw new Error("Invalid form data");
   }
 
   const { userId } = await auth();
@@ -17,22 +17,65 @@ export async function CreateFixedExpenses(from: FixedExpensesType) {
     redirect("/sign-in");
   }
 
-  const existingUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+  try {
+    const existingUser = await prisma.user.findUniqueOrThrow({
+      where: { clerkId: userId },
+    });
 
-  if (existingUser) {
-    const result = await prisma.fixedExpense.create({
+    await prisma.fixedExpense.create({
       data: {
         clerkId: userId,
         userId: existingUser.id,
         ...data,
-        dueDate: new Date(),
+        dueDate: data.dueDate ? new Date(data.dueDate) : new Date(),
       },
     });
 
-    if (!result) {
-      throw new Error("failed to create fixed expenses");
+    const [budget, budgetRules, totalFixedExpenses] = await prisma.$transaction(
+      [
+        prisma.budget.findFirst({
+          where: { clerkId: userId, userId: existingUser.id },
+        }),
+        prisma.budgetRule.findFirst({
+          where: { clerkId: userId, userId: existingUser.id },
+        }),
+        prisma.fixedExpense.aggregate({
+          where: { clerkId: userId, userId: existingUser.id },
+          _sum: { budgetAmount: true },
+        }),
+      ]
+    );
+
+    if (budget && budgetRules && totalFixedExpenses._sum.budgetAmount) {
+      const totalBudget = budget.amount;
+      const totalFixed = totalFixedExpenses._sum.budgetAmount;
+      const needsPercentage = (totalFixed / totalBudget) * 100;
+
+      const updatedBudgetRule = await prisma.budgetRule.upsert({
+        where: { id: budgetRules.id },
+        update: {
+          actualNeedsPercentage: needsPercentage,
+          actualSavingsPercentage: 30,
+          actualWantsPercentage: 20,
+        },
+        create: {
+          needsPercentage: 50,
+          savingsPercentage: 30,
+          wantsPercentage: 20,
+          actualNeedsPercentage: 0,
+          actualSavingsPercentage: 0,
+          actualWantsPercentage: 0,
+          userId: existingUser.id,
+          clerkId: userId,
+        },
+      });
+
+      return updatedBudgetRule;
     }
+
+    throw new Error("Failed to process budget or budget rules.");
+  } catch (error) {
+    console.error("Error in CreateFixedExpenses:", error);
+    throw new Error("An error occurred while creating fixed expenses.");
   }
 }

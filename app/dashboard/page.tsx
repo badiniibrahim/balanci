@@ -15,6 +15,7 @@ import {
   FileText,
 } from "lucide-react";
 import FixedExpenseCard from "./_components/FixedExpenseCard";
+import BudgetRuleTable from "./_components/BudgetRuleTable";
 
 function DashboardPage() {
   const { data: balance } = useQuery({
@@ -35,10 +36,10 @@ function DashboardPage() {
       <div className="flex flex-wrap lg:flex-nowrap justify-center">
         <Balance balance={balance} />
         <div className="flex m-3 flex-wrap justify-center gap-5 items-center ">
-          {/*<div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-4 gap-5">
             <FixedExpenseCard balance={balance} />
-          </div>*/}
-          {earningData.map((item) => (
+          </div>
+          {/*earningData.map((item) => (
             <div
               key={item.title}
               className="h-44 text-gray-200 bg-[#1a202c] md:w-56  p-4 pt-9 rounded-2xl "
@@ -58,39 +59,18 @@ function DashboardPage() {
               </p>
               <p className="text-sm text-gray-400  mt-1">{item.title}</p>
             </div>
-          ))}
+          ))*/}
         </div>
       </div>
       <div className="flex gap-10 flex-wrap justify-center">
         <BalanceChart balance={balance} />
         <div>
-          <div
-            className=" rounded-2xl md:w-400 p-4 m-3"
-            style={{ backgroundColor: "red" }}
-          >
-            <div className="flex justify-between items-center ">
-              <p className="font-semibold text-white text-2xl">Earnings</p>
-
-              <div>
-                <p className="text-2xl text-white font-semibold mt-8">
-                  $63,448.78
-                </p>
-                <p className="text-gray-200">Monthly revenue</p>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div>SparkLine</div>
-            </div>
+          <div className="rounded-2xl md:w-400 p-4 m-3 mr-5">
+            <BudgetRuleTable balance={balance} />
           </div>
 
           <div className="dark:text-gray-200 bg-[#1a202c] rounded-2xl md:w-400 p-8 m-3 flex justify-center items-center gap-10">
-            <div>
-              <p className="text-2xl font-semibold ">$43,246</p>
-              <p className="text-gray-400">Yearly sales</p>
-            </div>
-
-            <PieBalanceChart />
+            <PieBalanceChart balance={balance} />
           </div>
         </div>
       </div>

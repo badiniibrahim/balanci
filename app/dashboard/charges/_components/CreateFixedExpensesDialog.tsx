@@ -57,7 +57,7 @@ function CreateFixedExpensesDialog({ trigger }: Props) {
       toast.success("Fixed Expenses created", { id: "create-fixed-expenses" });
       form.reset();
       setDialogOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["fetchIncome"] });
+      queryClient.invalidateQueries({ queryKey: ["fetchFixedExpenses"] });
     },
     onError: () => {
       toast.error("Failed to create Fixed Expenses", {
