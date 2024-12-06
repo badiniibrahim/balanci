@@ -51,18 +51,32 @@ function FixedExpensesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-1 items-end justify-end">
+      <div className="flex flex-1 items-end justify-end gap-3">
+        <CreateFixedExpensesDialog
+          trigger={
+            <Button
+              variant={"outline"}
+              className="hover:bg-primary/55 hover:text-white bg-primary border-white"
+            >
+              Add new Variable Expenses
+            </Button>
+          }
+          type="variable"
+        />
+
         <CreateFixedExpensesDialog
           trigger={
             <Button
               variant={"outline"}
               className="hover:bg-primary/55 hover:text-white bg-primary"
             >
-              Add new fixed expenses
+              Add new Fixed Expenses
             </Button>
           }
+          type="fixed"
         />
       </div>
+
       <Suspense fallback={<UserIncomeSkeleton />}>
         <UserFixedExpenses
           fixedExpenses={fixedExpenses.fixedExpenses}

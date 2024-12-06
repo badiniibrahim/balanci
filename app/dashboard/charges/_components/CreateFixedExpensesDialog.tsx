@@ -37,9 +37,10 @@ import { Calendar } from "@/components/ui/calendar";
 
 interface Props {
   trigger: ReactNode;
+  type:string
 }
 
-function CreateFixedExpensesDialog({ trigger }: Props) {
+function CreateFixedExpensesDialog({ trigger, type }: Props) {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -84,7 +85,7 @@ function CreateFixedExpensesDialog({ trigger }: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Create a new <span className="text-primary">fixed expenses</span>
+            Create a new <span className="text-primary">{`${" "}${type} expenses`}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -98,7 +99,6 @@ function CreateFixedExpensesDialog({ trigger }: Props) {
                   <FormItem>
                     <FormLabel className="flex gap-1 items-center">
                       Name
-                      <p className="text-sm text-primary">(required)</p>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="name" {...field} />
@@ -114,7 +114,6 @@ function CreateFixedExpensesDialog({ trigger }: Props) {
                   <FormItem>
                     <FormLabel className="flex gap-1 items-center">
                       Amount
-                      <p className="text-sm text-primary">(required)</p>
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="amount" {...field} />
@@ -124,14 +123,13 @@ function CreateFixedExpensesDialog({ trigger }: Props) {
                 )}
               />
 
-              <FormField
+             {type === "fixed" && <FormField
                 control={form.control}
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex gap-1 items-center">
                       Due date
-                      <p className="text-sm text-primary">(required)</p>
                     </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -165,7 +163,7 @@ function CreateFixedExpensesDialog({ trigger }: Props) {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              />}
               <Button type="submit" className="w-full" disabled={isPending}>
                 {!isPending && "Create"}
                 {isPending && <Loader2 className="animate-spin" />}
