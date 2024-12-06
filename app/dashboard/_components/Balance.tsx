@@ -23,14 +23,16 @@ function Balance({ balance }: { balance: any }) {
       <div className="flex justify-between items-center">
         <div>
           <p className="font-bold text-white">Total Income</p>
-          <CountUp
-            preserveValue
-            redraw={false}
-            end={balance?.income}
-            decimal="2"
-            formattingFn={formatFn}
-            className="text-2xl"
-          />
+          <span className="text-lg font-semibold">
+            <CountUp
+              preserveValue
+              redraw={false}
+              end={balance?.income}
+              decimal="2"
+              formattingFn={formatFn}
+              className="text-2xl"
+            />
+          </span>
         </div>
         <button
           type="button"
