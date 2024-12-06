@@ -55,8 +55,8 @@ export async function CreateFixedExpenses(form: FixedExpensesType) {
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
-          actualSavingsPercentage: 30,
-          actualWantsPercentage: 20,
+          actualSavingsPercentage: 0,
+          actualWantsPercentage: 0,
         },
         create: {
           needsPercentage: 50,

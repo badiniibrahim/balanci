@@ -24,7 +24,7 @@ const chartConfig = {
   },
   chrome: {
     label: "Chrome",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-2))",
   },
   safari: {
     label: "Safari",
@@ -59,7 +59,7 @@ function PieBalanceChart({ balance }: { balance: any }) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut</CardTitle>
+        <CardTitle>Mon Budget en % </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
