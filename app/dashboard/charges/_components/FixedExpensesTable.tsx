@@ -47,6 +47,9 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
             <TableHead className="py-3 px-5 text-left font-semibold">
               <Calendar className="inline-block w-4 h-4 mr-2" /> Date
             </TableHead>
+            <TableHead className="py-3 px-5 text-left font-semibold">
+              <Calendar className="inline-block w-4 h-4 mr-2" /> Type
+            </TableHead>
             <TableHead className="py-3 px-5 text-right font-semibold">
               <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount
             </TableHead>
@@ -66,6 +69,9 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
               </TableCell>
               <TableCell className="py-3 px-5 text-gray-600">
                 {new Date(budget.createdAt).toLocaleDateString()}
+              </TableCell>
+              <TableCell className="py-3 px-5 text-gray-600">
+                {budget.type}
               </TableCell>
               <TableCell className="py-3 px-5 text-right text-gray-800 font-semibold">
                 {formatter.format(budget.budgetAmount)}

@@ -56,27 +56,15 @@ CREATE TABLE "Budget" (
 CREATE TABLE "FixedExpense" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "dueDate" TIMESTAMP(3) NOT NULL,
+    "dueDate" TIMESTAMP(3),
     "budgetAmount" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "clerkId" TEXT NOT NULL,
+    "type" TEXT NOT NULL DEFAULT 'fixed',
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "FixedExpense_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "VariableExpense" (
-    "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-    "budgetAmount" DOUBLE PRECISION NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "clerkId" TEXT NOT NULL,
-    "userId" INTEGER NOT NULL,
-
-    CONSTRAINT "VariableExpense_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -123,9 +111,6 @@ ALTER TABLE "Budget" ADD CONSTRAINT "Budget_userId_fkey" FOREIGN KEY ("userId") 
 
 -- AddForeignKey
 ALTER TABLE "FixedExpense" ADD CONSTRAINT "FixedExpense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "VariableExpense" ADD CONSTRAINT "VariableExpense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BudgetRule" ADD CONSTRAINT "BudgetRule_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

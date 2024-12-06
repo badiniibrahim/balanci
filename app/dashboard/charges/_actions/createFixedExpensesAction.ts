@@ -39,14 +39,51 @@ export async function CreateFixedExpenses(form: FixedExpensesType) {
         prisma.budgetRule.findFirst({
           where: { clerkId: userId, userId: existingUser.id },
         }),
-        prisma.fixedExpense.aggregate({
+        prisma.fixedExpense.groupBy({
+          by: ["type"],
           where: { clerkId: userId, userId: existingUser.id },
           _sum: { budgetAmount: true },
+          orderBy: {
+            type: "asc",
+          },
         }),
       ]
     );
 
-    if (budget && budgetRules && totalFixedExpenses._sum.budgetAmount) {
+    if (budget && budgetRules && totalFixedExpenses) {
+      const totalBudget = budget.amount;
+      const totalFixed =
+        totalFixedExpenses.find((t) => t.type === "fixed")?._sum
+          ?.budgetAmount || 0;
+      const totalVariable =
+        totalFixedExpenses.find((t) => t.type === "variable")?._sum
+          ?.budgetAmount || 0;
+
+      const total = totalFixed + totalVariable;
+      const needsPercentage = (total / totalBudget) * 100;
+      const updatedBudgetRule = await prisma.budgetRule.upsert({
+        where: { id: budgetRules.id },
+        update: {
+          actualNeedsPercentage: needsPercentage,
+          actualSavingsPercentage: 0,
+          actualWantsPercentage: 0,
+        },
+        create: {
+          needsPercentage: 50,
+          savingsPercentage: 30,
+          wantsPercentage: 20,
+          actualNeedsPercentage: 0,
+          actualSavingsPercentage: 0,
+          actualWantsPercentage: 0,
+          userId: existingUser.id,
+          clerkId: userId,
+        },
+      });
+
+      return updatedBudgetRule;
+    }
+
+    /*if (budget && budgetRules && totalFixedExpenses._sum.budgetAmount) {
       const totalBudget = budget.amount;
       const totalFixed = totalFixedExpenses._sum.budgetAmount;
       const needsPercentage = (totalFixed / totalBudget) * 100;
@@ -71,7 +108,7 @@ export async function CreateFixedExpenses(form: FixedExpensesType) {
       });
 
       return updatedBudgetRule;
-    }
+    }*/
 
     throw new Error("Failed to process budget or budget rules.");
   } catch (error) {

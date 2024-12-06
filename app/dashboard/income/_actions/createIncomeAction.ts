@@ -46,21 +46,30 @@ export async function CreateIncome(from: IncomeSchemaType) {
         prisma.budgetRule.findFirst({
           where: { clerkId: userId, userId: existingUser.id },
         }),
-        prisma.fixedExpense.aggregate({
+        prisma.fixedExpense.groupBy({
+          by: ["type"],
           where: { clerkId: userId, userId: existingUser.id },
           _sum: { budgetAmount: true },
+          orderBy: {
+            type: "asc",
+          },
         }),
       ]
     );
 
-    const totalBudget = budget._sum.amount || 0;
-    const totalFixed = totalFixedExpenses._sum.budgetAmount || 0;
+    if (budget && budgetRules && totalFixedExpenses) {
+      const totalBudget = budget._sum.amount || 0;
+      const totalFixed =
+        totalFixedExpenses.find((t) => t.type === "fixed")?._sum
+          ?.budgetAmount || 0;
+      const totalVariable =
+        totalFixedExpenses.find((t) => t.type === "variable")?._sum
+          ?.budgetAmount || 0;
 
-    if (totalBudget > 0) {
-      const needsPercentage = (totalFixed / totalBudget) * 100;
-
+      const total = totalFixed + totalVariable;
+      const needsPercentage = (total / totalBudget) * 100;
       const updatedBudgetRule = await prisma.budgetRule.upsert({
-        where: { id: budgetRules?.id || 0 },
+        where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
           actualSavingsPercentage: 0,
@@ -70,7 +79,7 @@ export async function CreateIncome(from: IncomeSchemaType) {
           needsPercentage: 50,
           savingsPercentage: 30,
           wantsPercentage: 20,
-          actualNeedsPercentage: needsPercentage,
+          actualNeedsPercentage: 0,
           actualSavingsPercentage: 0,
           actualWantsPercentage: 0,
           userId: existingUser.id,

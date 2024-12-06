@@ -35,9 +35,10 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 
+type ExpenseType = "fixed" | "variable";
 interface Props {
   trigger: ReactNode;
-  type:string
+  type: ExpenseType;
 }
 
 function CreateFixedExpensesDialog({ trigger, type }: Props) {
@@ -48,20 +49,24 @@ function CreateFixedExpensesDialog({ trigger, type }: Props) {
     resolver: zodResolver(FixedExpensesSchema),
     defaultValues: {
       name: "",
+      type,
       budgetAmount: 0,
     },
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: CreateFixedExpenses,
+    mutationFn: (values: FixedExpensesType) =>
+      CreateFixedExpenses({ ...values, type }),
     onSuccess: () => {
-      toast.success("Fixed Expenses created", { id: "create-fixed-expenses" });
+      toast.success(`${type} Expenses created`, {
+        id: "create-fixed-expenses",
+      });
       form.reset();
       setDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["fetchFixedExpenses"] });
     },
     onError: () => {
-      toast.error("Failed to create Fixed Expenses", {
+      toast.error(`Failed to create ${type} Expenses`, {
         id: "create-fixed-expenses",
       });
     },
@@ -69,12 +74,12 @@ function CreateFixedExpensesDialog({ trigger, type }: Props) {
 
   const onSubmit = useCallback(
     (values: FixedExpensesType) => {
-      toast.loading("Creating fixed expense...", {
+      toast.loading(`Creating ${type} expense...`, {
         id: "create-fixed-expenses",
       });
       mutate(values);
     },
-    [mutate]
+    [mutate, type]
   );
 
   return (
@@ -85,7 +90,8 @@ function CreateFixedExpensesDialog({ trigger, type }: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Create a new <span className="text-primary">{`${" "}${type} expenses`}</span>
+            Create a new{" "}
+            <span className="text-primary">{`${" "}${type} expenses`}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -123,47 +129,49 @@ function CreateFixedExpensesDialog({ trigger, type }: Props) {
                 )}
               />
 
-             {type === "fixed" && <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex gap-1 items-center">
-                      Due date
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[200px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick date</span>
-                            )}
+              {type === "fixed" && (
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex gap-1 items-center">
+                        Due date
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[200px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick date</span>
+                              )}
 
-                            <Calendar1Icon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />}
+                              <Calendar1Icon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <Button type="submit" className="w-full" disabled={isPending}>
                 {!isPending && "Create"}
                 {isPending && <Loader2 className="animate-spin" />}
