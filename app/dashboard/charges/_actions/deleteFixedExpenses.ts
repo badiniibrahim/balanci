@@ -54,7 +54,7 @@ export async function DeleteFixedExpenses(id: number) {
         where: { id: budgetRules?.id || 0 },
         update: {
           actualNeedsPercentage: needsPercentage,
-          actualSavingsPercentage: 0, // Ajouter les calculs nécessaires
+          actualSavingsPercentage: 0,
           actualWantsPercentage: 0,
         },
         create: {
