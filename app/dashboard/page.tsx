@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import FixedExpenseCard from "./_components/FixedExpenseCard";
 import BudgetRuleTable from "./_components/BudgetRuleTable";
+import VariableExpenseCard from "./_components/VariableExpenseCard";
+import RemainsBudgetCard from "./_components/RemainsBudgetCard";
 
 function DashboardPage() {
   const { data: balance } = useQuery({
@@ -38,6 +40,8 @@ function DashboardPage() {
         <div className="flex m-3 flex-wrap justify-center gap-5 items-center ">
           <div className="grid grid-cols-4 gap-5">
             <FixedExpenseCard balance={balance} />
+            <VariableExpenseCard balance={balance} />
+            <RemainsBudgetCard balance={balance} />
           </div>
           {/*earningData.map((item) => (
             <div

@@ -26,12 +26,12 @@ export async function GET() {
             amount: true,
           },
         }),
-        prisma.fixedExpense.aggregate({
-          where: {
-            userId: existingUser.id,
-          },
-          _sum: {
-            budgetAmount: true,
+        prisma.fixedExpense.groupBy({
+          by: ["type"],
+          where: { clerkId: user.id, userId: existingUser.id },
+          _sum: { budgetAmount: true },
+          orderBy: {
+            type: "asc",
           },
         }),
         prisma.budgetRule.findFirst({
@@ -43,9 +43,19 @@ export async function GET() {
 
     const currency = userSettings?.currency || "USD";
 
+    const totalFixed =
+      totalExpense.find((t) => t.type === "fixed")?._sum?.budgetAmount || 0;
+    const totalVariable =
+      totalExpense.find((t) => t.type === "variable")?._sum?.budgetAmount || 0;
+
+    const remainsBudget =
+      (totalBudget._sum.amount || 0) - totalFixed - totalVariable;
+
     return Response.json({
       income: totalBudget._sum.amount || 0,
-      expense: totalExpense._sum.budgetAmount || 0,
+      expense: totalFixed || 0,
+      variable: totalVariable,
+      remainsBudget: remainsBudget,
       currency,
       budgetRules: budgetRules,
     });

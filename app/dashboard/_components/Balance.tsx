@@ -19,7 +19,7 @@ function Balance({ balance }: { balance: any }) {
   );
 
   return (
-    <div className=" dark:text-gray-200 bg-[#1a202c] h-44 rounded-xl w-full lg:w-80 p-8 pt-9 m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center">
+    <div className=" dark:text-gray-200 bg-[hsl(var(--chart-1))] h-44 rounded-xl w-full lg:w-80 p-8 pt-9 m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center">
       <div className="flex justify-between items-center">
         <div>
           <p className="font-bold text-white">Total Income</p>

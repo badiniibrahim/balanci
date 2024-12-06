@@ -38,7 +38,7 @@ const chartConfig = {
 function BalanceChart({
   balance,
 }: {
-  balance: { income: number; expense: number };
+  balance: { income: number; expense: number; variable: number };
 }) {
   const chartData = [
     {
@@ -51,7 +51,11 @@ function BalanceChart({
       visitors: balance?.expense,
       fill: "var(--color-safari)",
     },
-    { browser: "firefox", visitors: 0, fill: "var(--color-firefox)" },
+    {
+      browser: "firefox",
+      visitors: balance?.variable,
+      fill: "var(--color-firefox)",
+    },
     { browser: "edge", visitors: 0, fill: "var(--color-edge)" },
     { browser: "other", visitors: 0, fill: "var(--color-other)" },
   ];

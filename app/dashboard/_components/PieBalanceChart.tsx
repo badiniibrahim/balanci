@@ -28,7 +28,7 @@ const chartConfig = {
   },
   safari: {
     label: "Safari",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--chart-3))",
   },
   firefox: {
     label: "Firefox",
@@ -47,11 +47,15 @@ const chartConfig = {
 function PieBalanceChart({ balance }: { balance: any }) {
   const chartData = [
     {
-      browser: "Fixed Charges ",
+      browser: "Fixed Charges",
       visitors: balance?.expense,
       fill: "var(--color-chrome)",
     },
-    { browser: "safari", visitors: 0, fill: "var(--color-safari)" },
+    {
+      browser: "Variable Charges",
+      visitors: balance?.variable,
+      fill: "var(--color-safari)",
+    },
     { browser: "firefox", visitors: 0, fill: "var(--color-firefox)" },
     { browser: "edge", visitors: 0, fill: "var(--color-edge)" },
     { browser: "other", visitors: 0, fill: "var(--color-other)" },
