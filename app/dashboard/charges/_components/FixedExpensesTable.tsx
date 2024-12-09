@@ -1,19 +1,34 @@
+"use client";
+
 import DialogAction from "@/components/shared/DialogAction";
 import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Calendar, DollarSign } from "lucide-react";
+
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+  getFilteredRowModel,
+} from "@tanstack/react-table";
+
 import { useDeleteMutation } from "@/hooks/useDeleteMutation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import { DeleteFixedExpenses } from "../_actions/deleteFixedExpenses";
 import { FixedExpense } from "@prisma/client";
+import { DataTableColumnHeader } from "./dataTable/ColumnHeader";
+import { cn } from "@/lib/utils";
+import { DataTableFacetedFilter } from "./dataTable/FacetedFilter";
 
 type Props = {
   fixedExpenses: FixedExpense[];
@@ -21,10 +36,12 @@ type Props = {
 };
 
 export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
-  const totalAmount = fixedExpenses.reduce(
-    (sum, budget) => sum + budget.budgetAmount,
-    0
-  );
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(currency);
+  }, [currency]);
 
   const deleteMutation = useDeleteMutation(
     "fixed expenses",
@@ -32,79 +49,152 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
     "fetchFixedExpenses"
   );
 
-  const formatter = useMemo(() => {
-    return GetFormatterForCurrency(currency);
-  }, [currency]);
+  const columns: ColumnDef<FixedExpense>[] = [
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Name" className="text-white font-bold"/>
+      ),
+      cell: ({ row }) => (
+        <div className="text-white font-bold">{row.original.name}</div>
+      ),
+    },
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
+      ),
+      cell: ({ row }) => (
+        <div
+          className={cn(
+            "capitalize w-[100px] rounded-full text-center px-3 py-1 text-sm",
+            row.original.type === "fixed" && "bg-green-100 text-green-600",
+            row.original.type === "variable" && "bg-red-100 text-red-600"
+          )}
+        >
+          {row.original.type}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Date",
+      cell: ({ row }) => {
+        const date = new Date(row.original.createdAt).toLocaleDateString(
+          "default",
+          {
+            timeZone: "UTC",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }
+        );
+        return <div className="text-white font-bold">{date}</div>;
+      },
+    },
+    {
+      accessorKey: "budgetAmount",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Amount" />
+      ),
+      cell: ({ row }) => (
+        <p className="text-white font-bold">
+          {formatter.format(row.original.budgetAmount)}
+        </p>
+      ),
+    },
+    {
+      accessorKey: "Actions",
+      cell: ({ row }) => (
+        <DialogAction
+          entityName={row.original.name}
+          entityId={row.original.id}
+          entityType="income"
+          deleteMutation={deleteMutation}
+        />
+      ),
+    },
+  ];
+
+  const table = useReactTable({
+    data: fixedExpenses || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+  });
 
   return (
-    <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
-      <Table className="min-w-full bg-gradient-to-br from-white via-gray-50 to-gray-100">
-        <TableHeader>
-          <TableRow className=" text-white">
-            <TableHead className="py-3 px-5 text-left font-semibold">
-              Name
-            </TableHead>
-            <TableHead className="py-3 px-5 text-left font-semibold">
-              <Calendar className="inline-block w-4 h-4 mr-2" /> Date
-            </TableHead>
-            <TableHead className="py-3 px-5 text-left font-semibold">
-              <Calendar className="inline-block w-4 h-4 mr-2" /> Type
-            </TableHead>
-            <TableHead className="py-3 px-5 text-right font-semibold">
-              <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount
-            </TableHead>
-            <TableHead className="py-3 px-5 text-center font-semibold">
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {fixedExpenses.map((budget) => (
-            <TableRow
-              key={budget.id}
-              className="transition hover:bg-blue-50 hover:shadow-inner"
-            >
-              <TableCell className="py-3 px-5 font-medium text-gray-800">
-                {budget.name}
-              </TableCell>
-              <TableCell className="py-3 px-5 text-gray-600">
-                {new Date(budget.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell className="py-3 px-5 text-gray-600">
-                {budget.type}
-              </TableCell>
-              <TableCell className="py-3 px-5 text-right text-gray-800 font-semibold">
-                {formatter.format(budget.budgetAmount)}
-              </TableCell>
-
-              <TableCell className="py-3 px-5 text-center">
-                <DialogAction
-                  entityName={budget.name}
-                  entityId={budget.id}
-                  entityType="income"
-                  deleteMutation={deleteMutation}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow className="bg-primary/50">
-            <TableCell
-              colSpan={3}
-              className="py-3 px-5 text-right font-semibold text-gray-800"
-            >
-              Total
-            </TableCell>
-            <TableCell
-              colSpan={2}
-              className="py-3 px-5 text-right text-blue-600 font-bold"
-            >
-              ${totalAmount.toFixed(2)}
-            </TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
+    <div className="w-full p-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-lg text-white font-bold">Expenses</h1>
+        <div className="flex gap-2">
+          {table.getColumn("type") && (
+            <DataTableFacetedFilter
+              title="Type"
+              column={table.getColumn("type")}
+              options={[
+                { label: "Variable", value: "variable" },
+                { label: "Fixed", value: "fixed" },
+              ]}
+            />
+          )}
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-lg border border-white">
+        <Table className="w-full">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow
+                key={headerGroup.id}
+                className="text-white font-bold"
+              >
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="p-4 text-white font-bold">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="hover:bg-primary/90 transition-colors"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="p-4 text-white font-bold">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center text-gray-500 p-4"
+                >
+                  No results found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

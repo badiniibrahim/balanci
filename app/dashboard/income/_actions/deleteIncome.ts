@@ -52,15 +52,15 @@ export async function DeleteIncome(id: number) {
   if (budget && budgetRules && totalFixedExpenses) {
     const totalBudget = budget._sum.amount || 0;
     const totalFixed =
-      totalFixedExpenses.find((t) => t.type === "fixed")?._sum
-        ?.budgetAmount || 0;
+      totalFixedExpenses.find((t) => t.type === "fixed")?._sum?.budgetAmount ||
+      0;
     const totalVariable =
       totalFixedExpenses.find((t) => t.type === "variable")?._sum
         ?.budgetAmount || 0;
 
     const total = totalFixed + totalVariable;
     const needsPercentage = (total / totalBudget) * 100;
-    const updatedBudgetRule = await prisma.budgetRule.upsert({
+    await prisma.budgetRule.upsert({
       where: { id: budgetRules.id },
       update: {
         actualNeedsPercentage: needsPercentage,
@@ -78,9 +78,7 @@ export async function DeleteIncome(id: number) {
         clerkId: userId,
       },
     });
-
-    return updatedBudgetRule;
-  } 
+  }
 
   throw new Error("Budget calculations failed.");
 }

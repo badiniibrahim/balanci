@@ -39,44 +39,47 @@ function FixedExpensesPage() {
 
   if (isError && error instanceof Error) {
     return (
-      <div className="flex justify-center items-center">
-        <Alert variant={"destructive"}>
-          <AlertCircle className="w-4 h-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error.message}</AlertDescription>
+      <div className="flex justify-center items-center h-full">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="w-6 h-6 text-red-500" />
+          <div>
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error.message}</AlertDescription>
+          </div>
         </Alert>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-1 items-end justify-end gap-3">
+    <div className="flex h-full flex-col gap-6">
+      {/* Actions */}
+      <div className="flex justify-end gap-4">
         <CreateFixedExpensesDialog
           trigger={
             <Button
-              variant={"outline"}
-              className="hover:bg-primary/55 hover:text-white bg-primary border-white"
+              variant="secondary"
+              className="bg-blue-500 text-white hover:bg-blue-600"
             >
-              Add new Variable Expenses
+              Add Variable Expense
             </Button>
           }
           type="variable"
         />
-
         <CreateFixedExpensesDialog
           trigger={
             <Button
-              variant={"outline"}
-              className="hover:bg-primary/55 hover:text-white bg-primary"
+              variant="secondary"
+              className="bg-green-500 text-white hover:bg-green-600"
             >
-              Add new Fixed Expenses
+              Add Fixed Expense
             </Button>
           }
           type="fixed"
         />
       </div>
 
+      {/* Fixed Expenses Table */}
       <Suspense fallback={<UserIncomeSkeleton />}>
         <UserFixedExpenses
           fixedExpenses={fixedExpenses.fixedExpenses}

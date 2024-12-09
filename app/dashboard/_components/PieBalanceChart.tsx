@@ -61,7 +61,7 @@ function PieBalanceChart({ balance }: { balance: any }) {
     { browser: "other", visitors: 0, fill: "var(--color-other)" },
   ];
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col bg-[#1a202c] border-none">
       <CardHeader className="items-center pb-0">
         <CardTitle>Mon Budget en % </CardTitle>
       </CardHeader>

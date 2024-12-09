@@ -10,38 +10,60 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 function BudgetRuleTable({ balance }: { balance: any }) {
   return (
     <div className="overflow-x-auto">
-      <Table className="w-full border">
+      <Table className="w-full border-collapse border border-muted rounded-md shadow-sm">
         <TableHeader>
-          <TableRow className="bg-muted">
-            <TableHead className="px-4 py-2 text-left">Catégorie</TableHead>
-            <TableHead className="px-4 py-2 text-left">Règle (%)</TableHead>
-            <TableHead className="px-4 py-2 text-left">Suivi</TableHead>
+          <TableRow className="bg-muted/20">
+            <TableHead className="px-4 py-3 text-left font-semibold text-sm uppercase text-muted-foreground">
+              Catégorie
+            </TableHead>
+            <TableHead className="px-4 py-3 text-center font-semibold text-sm uppercase text-muted-foreground">
+              Règle (%)
+            </TableHead>
+            <TableHead className="px-4 py-3 text-center font-semibold text-sm uppercase text-muted-foreground">
+              Suivi (%)
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell className="px-4 py-2">
-              DÉPENSES FIXES ET VARIABLES
+          {/* Ligne 1 */}
+          <TableRow className="hover:bg-muted/10 transition">
+            <TableCell className="px-4 py-3 text-sm font-medium text-primary">
+              Dépenses Fixes et Variables
             </TableCell>
-            <TableCell className="px-4 py-2 text-center">50,00%</TableCell>
-            <TableCell className="px-4 py-2 text-center">{`${balance?.budgetRules?.actualNeedsPercentage} %`}</TableCell>
+            <TableCell className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+              50,00%
+            </TableCell>
+            <TableCell className="px-4 py-3 text-center text-sm font-medium text-emerald-500">
+              {balance?.budgetRules?.actualNeedsPercentage ?? "0,00"} %
+            </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="px-4 py-2">
-              ÉPARGNE, INVEST & DETTES
+          {/* Ligne 2 */}
+          <TableRow className="hover:bg-muted/10 transition">
+            <TableCell className="px-4 py-3 text-sm font-medium text-primary">
+              Épargne, Invest & Dettes
             </TableCell>
-            <TableCell className="px-4 py-2 text-center">30,00%</TableCell>
-            <TableCell className="px-4 py-2 text-center">0,00%</TableCell>
+            <TableCell className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+              30,00%
+            </TableCell>
+            <TableCell className="px-4 py-3 text-center text-sm font-medium text-emerald-500">
+              0,00%
+            </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="px-4 py-2">
-              PLAISIRS & FONDS RÉSERVE
+          {/* Ligne 3 */}
+          <TableRow className="hover:bg-muted/10 transition">
+            <TableCell className="px-4 py-3 text-sm font-medium text-primary">
+              Plaisirs & Fonds Réserve
             </TableCell>
-            <TableCell className="px-4 py-2 text-center">20,00%</TableCell>
-            <TableCell className="px-4 py-2 text-center">0,00%</TableCell>
+            <TableCell className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+              20,00%
+            </TableCell>
+            <TableCell className="px-4 py-3 text-center text-sm font-medium text-emerald-500">
+              0,00%
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>

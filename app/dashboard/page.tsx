@@ -1,19 +1,12 @@
 "use client";
 
-import { earningData } from "@/constants";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import Balance from "./_components/Balance";
 import BalanceChart from "./_components/BalanceChart";
 import PieBalanceChart from "./_components/PieBalanceChart";
-import {
-  LayoutDashboard,
-  DollarSign,
-  Shield,
-  UserCircle,
-  FileText,
-} from "lucide-react";
+
 import FixedExpenseCard from "./_components/FixedExpenseCard";
 import BudgetRuleTable from "./_components/BudgetRuleTable";
 import VariableExpenseCard from "./_components/VariableExpenseCard";
@@ -69,7 +62,7 @@ function DashboardPage() {
       <div className="flex gap-10 flex-wrap justify-center">
         <BalanceChart balance={balance} />
         <div>
-          <div className="rounded-2xl md:w-400 p-4 m-3 mr-5">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
             <BudgetRuleTable balance={balance} />
           </div>
 

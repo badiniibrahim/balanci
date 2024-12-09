@@ -59,7 +59,7 @@ export async function DeleteFixedExpenses(id: number) {
 
       const total = totalFixed + totalVariable;
       const needsPercentage = (total / totalBudget) * 100;
-      const updatedBudgetRule = await prisma.budgetRule.upsert({
+      await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
@@ -77,8 +77,6 @@ export async function DeleteFixedExpenses(id: number) {
           clerkId: userId,
         },
       });
-
-      return updatedBudgetRule;
     }
 
     throw new Error("Budget calculations failed.");
