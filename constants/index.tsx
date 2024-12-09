@@ -1,39 +1,48 @@
+import { UserCircle } from "lucide-react";
+
 import {
-  LayoutDashboard,
-  DollarSign,
-  Shield,
-  UserCircle,
-  FileText,
-} from "lucide-react";
+  FaDollarSign,
+  FaFileInvoice,
+  FaPiggyBank,
+  FaRegCreditCard,
+  FaRegStar,
+  FaUserCircle,
+} from "react-icons/fa";
+import { AiOutlineAppstore } from "react-icons/ai";
 
 export const sidebarLinks = [
   {
-    icon: LayoutDashboard,
+    icon: AiOutlineAppstore,
     route: "/dashboard",
     label: "Dashboard",
   },
   {
-    icon: DollarSign,
+    icon: FaDollarSign,
     route: "/dashboard/income",
     label: "Income",
   },
   {
-    icon: FileText,
+    icon: FaFileInvoice,
     route: "/dashboard/charges",
     label: "Charges",
   },
   {
-    icon: FileText,
+    icon: FaPiggyBank,
     route: "/dashboard/savings",
     label: "Savings and Investments",
   },
   {
-    icon: Shield,
+    icon: FaRegCreditCard,
+    route: "/dashboard/debts",
+    label: "Debts",
+  },
+  {
+    icon: FaRegStar,
     route: "/dashboard/upgrade",
     label: "Upgrade",
   },
   {
-    icon: UserCircle,
+    icon: FaUserCircle,
     route: "/dashboard/profile",
     label: "Profile",
   },

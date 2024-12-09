@@ -4,10 +4,13 @@
 import React, { useMemo, useCallback } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import CountUp from "react-countup";
+import {
+  
+  FaRegCreditCard,
+  
+} from "react-icons/fa";
 
-import { FaPiggyBank } from "react-icons/fa";
-
-function SavingsCard({ balance }: { balance: any }) {
+function DebtsCard({ balance }: { balance: any }) {
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(balance?.currency ?? "USD");
   }, [balance]);
@@ -21,7 +24,7 @@ function SavingsCard({ balance }: { balance: any }) {
   return (
     <div
       key={"item.title"}
-      className="h-44 text-gray-200 bg-[hsl(var(--chart-4))] md:w-56  p-4 pt-9 rounded-2xl "
+      className="h-44 text-gray-200 bg-[hsl(var(--chart-5))] md:w-56  p-4 pt-9 rounded-2xl "
     >
       <button
         type="button"
@@ -31,23 +34,23 @@ function SavingsCard({ balance }: { balance: any }) {
         }}
         className="text-2xl opacity-0.9 rounded-full  p-4 hover:drop-shadow-xl bg-[#E5FAFB]"
       >
-        <FaPiggyBank />
+        <FaRegCreditCard />
       </button>
       <p className="mt-3">
         <span className="text-lg font-semibold">
           <CountUp
             preserveValue
             redraw={false}
-            end={balance?.savings}
+            end={balance?.debts}
             decimal="2"
             formattingFn={formatFn}
             className="text-2xl"
           />
         </span>
       </p>
-      <p className="text-sm text-white  mt-1">{"Savings and Investments"}</p>
+      <p className="text-sm text-white  mt-1">{"Debts"}</p>
     </div>
   );
 }
 
-export default SavingsCard;
+export default DebtsCard;

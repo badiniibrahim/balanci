@@ -12,6 +12,8 @@ import BudgetRuleTable from "./_components/BudgetRuleTable";
 import VariableExpenseCard from "./_components/VariableExpenseCard";
 import RemainsBudgetCard from "./_components/RemainsBudgetCard";
 import SavingsCard from "./_components/SavingsCard";
+import DebtsCard from "./_components/DebtsCard";
+
 
 function DashboardPage() {
   const { data: balance } = useQuery({
@@ -33,10 +35,11 @@ function DashboardPage() {
         <Balance balance={balance} />
         <div className="flex m-3 flex-wrap justify-center gap-5 items-center ">
           <div className="grid grid-cols-4 gap-5">
-          <RemainsBudgetCard balance={balance} />
+            <RemainsBudgetCard balance={balance} />
             <FixedExpenseCard balance={balance} />
             <VariableExpenseCard balance={balance} />
             <SavingsCard balance={balance} />
+            <DebtsCard balance={balance} />
           </div>
         </div>
       </div>

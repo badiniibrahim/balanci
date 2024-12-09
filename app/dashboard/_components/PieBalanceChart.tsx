@@ -62,7 +62,7 @@ function PieBalanceChart({ balance }: { balance: any }) {
       visitors: balance?.savings,
       fill: "var(--color-edge)",
     },
-    { browser: "other", visitors: 0, fill: "var(--color-other)" },
+    { browser: "other", visitors: balance?.debts, fill: "var(--color-other)" },
   ];
   return (
     <Card className="flex flex-col bg-[#1a202c] border-none">

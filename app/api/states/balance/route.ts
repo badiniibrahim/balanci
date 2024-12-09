@@ -22,7 +22,7 @@ export async function GET() {
   const userId = existingUser.id;
 
   // Fetch all required data in parallel
-  const [userSettings, totalBudget, expenseData, budgetRules, savingsData] =
+  const [userSettings, totalBudget, expenseData, budgetRules, savingsData, totalDebts] =
     await Promise.all([
       prisma.userSettings.findUnique({ where: { id: userId } }),
       prisma.budget.aggregate({
@@ -42,6 +42,10 @@ export async function GET() {
         _sum: { budgetAmount: true },
         orderBy: { type: "asc" },
       }),
+      prisma.debts.aggregate({
+        where: { userId },
+        _sum: { budgetAmount: true },
+      }),
     ]);
 
   const currency = userSettings?.currency || "USD";
@@ -56,8 +60,9 @@ export async function GET() {
   const totalInvest = getSumByType(savingsData, "invest");
 
   const income = totalBudget._sum.amount || 0;
+  const totalDebt = totalDebts._sum.budgetAmount || 0
   const remainsBudget =
-    income - totalFixed - totalVariable - totalSaving - totalInvest;
+    income - totalFixed - totalVariable - totalSaving - totalInvest - totalDebt;
 
   return Response.json({
     income,
@@ -67,5 +72,6 @@ export async function GET() {
     currency,
     budgetRules,
     savings: totalSaving + totalInvest,
+    debts:totalDebt
   });
 }
