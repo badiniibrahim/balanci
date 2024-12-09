@@ -15,6 +15,7 @@ export async function CreateSavings(form: SavingsType) {
 
   if (!userId) {
     redirect("/sign-in");
+    return;
   }
 
   try {
@@ -31,8 +32,9 @@ export async function CreateSavings(form: SavingsType) {
     });
 
     const [budget, budgetRules, totalSavings] = await prisma.$transaction([
-      prisma.budget.findFirst({
+      prisma.budget.aggregate({
         where: { clerkId: userId, userId: existingUser.id },
+        _sum: { amount: true },
       }),
       prisma.budgetRule.findFirst({
         where: { clerkId: userId, userId: existingUser.id },
@@ -48,16 +50,19 @@ export async function CreateSavings(form: SavingsType) {
     ]);
 
     if (budget && budgetRules && totalSavings) {
-      const totalBudget = budget.amount;
+      const totalBudget = budget._sum.amount || 0;
 
       const totalSaving =
         totalSavings.find((t) => t.type === "saving")?._sum?.budgetAmount || 0;
-
       const totalInvest =
         totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
 
       const total = totalSaving + totalInvest;
-      const savingsPercentage = (total / totalBudget) * 100;
+
+      const savingsPercentage =
+        totalBudget > 0 ? (total / totalBudget) * 100 : 0;
+
+      console.log({ totalBudget, totalSaving, totalInvest, savingsPercentage });
 
       const updatedBudgetRule = await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },
@@ -69,7 +74,7 @@ export async function CreateSavings(form: SavingsType) {
           savingsPercentage: 30,
           wantsPercentage: 20,
           actualNeedsPercentage: 0,
-          actualSavingsPercentage: 0,
+          actualSavingsPercentage: savingsPercentage,
           actualWantsPercentage: 0,
           userId: existingUser.id,
           clerkId: userId,
@@ -81,7 +86,7 @@ export async function CreateSavings(form: SavingsType) {
 
     throw new Error("Failed to process budget or budget rules.");
   } catch (error) {
-    console.error("Error in CreateFixedExpenses:", error);
-    throw new Error("An error occurred while creating fixed expenses.");
+    console.error("Error in CreateSavings:", error);
+    throw new Error("An error occurred while creating savings.");
   }
 }

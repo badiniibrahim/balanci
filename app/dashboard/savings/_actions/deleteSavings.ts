@@ -9,6 +9,7 @@ export async function DeleteSavings(id: number) {
 
   if (!userId) {
     redirect("/sign-in");
+    return;
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -20,12 +21,16 @@ export async function DeleteSavings(id: number) {
   }
 
   try {
+    const savingExists = await prisma.savings.findUnique({
+      where: { id },
+    });
+
+    if (!savingExists) {
+      throw new Error("Saving record not found.");
+    }
+
     await prisma.savings.delete({
-      where: {
-        id,
-        userId: existingUser.id,
-        clerkId: userId,
-      },
+      where: { id },
     });
 
     const [budget, budgetRules, totalSavings] = await prisma.$transaction([
@@ -40,40 +45,39 @@ export async function DeleteSavings(id: number) {
         by: ["type"],
         where: { clerkId: userId, userId: existingUser.id },
         _sum: { budgetAmount: true },
-        orderBy: {
-          type: "asc",
-        },
+        orderBy: { type: "asc" },
       }),
     ]);
 
-    if (budget && budgetRules && totalSavings) {
-      const totalBudget = budget._sum.amount || 0;
-      const totalSaving =
-        totalSavings.find((t) => t.type === "saving")?._sum?.budgetAmount || 0;
-      const totalInvest =
-        totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
+    const totalBudget = budget?._sum?.amount || 0;
 
-      const total = totalSaving + totalInvest;
-      const savingPercentage = (total / totalBudget) * 100;
-      await prisma.budgetRule.upsert({
-        where: { id: budgetRules.id },
-        update: {
-          actualSavingsPercentage: savingPercentage,
-        },
-        create: {
-          needsPercentage: 50,
-          savingsPercentage: 30,
-          wantsPercentage: 20,
-          actualNeedsPercentage: 0,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
-          userId: existingUser.id,
-          clerkId: userId,
-        },
-      });
-    }
+    const totalSaving =
+      totalSavings.find((t) => t.type === "saving")?._sum?.budgetAmount || 0;
+    const totalInvest =
+      totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
+
+    const total = totalSaving + totalInvest;
+
+    const savingPercentage = totalBudget > 0 ? (total / totalBudget) * 100 : 0;
+
+    await prisma.budgetRule.upsert({
+      where: { id: budgetRules?.id || 0 },
+      update: {
+        actualSavingsPercentage: savingPercentage,
+      },
+      create: {
+        needsPercentage: 50,
+        savingsPercentage: 30,
+        wantsPercentage: 20,
+        actualNeedsPercentage: 0,
+        actualSavingsPercentage: savingPercentage,
+        actualWantsPercentage: 0,
+        userId: existingUser.id,
+        clerkId: userId,
+      },
+    });
   } catch (error) {
-    console.error("Error deleting fixed expense:", error);
-    throw new Error("An error occurred while deleting the fixed expense.");
+    console.error("Error while deleting saving:", error);
+    throw new Error("An error occurred while processing the saving deletion.");
   }
 }

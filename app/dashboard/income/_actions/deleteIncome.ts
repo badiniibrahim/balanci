@@ -60,7 +60,6 @@ export async function DeleteIncome(id: number) {
       }),
     ]);
 
-  console.log({ budget, budgetRules, totalFixedExpenses, totalSavings });
 
   if (budget && budgetRules && totalFixedExpenses && totalSavings) {
     const totalBudget = budget._sum.amount || 0;
