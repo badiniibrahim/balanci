@@ -1,65 +1,71 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import prisma from "@/prisma/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function GET() {
   const user = await currentUser();
+
   if (!user) {
     redirect("/sign-in");
+    return;
   }
 
   const existingUser = await prisma.user.findUnique({
     where: { clerkId: user.id },
   });
 
-  if (existingUser) {
-    const [userSettings, totalBudget, totalExpense, budgetRules] =
-      await Promise.all([
-        prisma.userSettings.findUnique({
-          where: { id: existingUser.id },
-        }),
-        prisma.budget.aggregate({
-          where: {
-            userId: existingUser.id,
-          },
-          _sum: {
-            amount: true,
-          },
-        }),
-        prisma.fixedExpense.groupBy({
-          by: ["type"],
-          where: { clerkId: user.id, userId: existingUser.id },
-          _sum: { budgetAmount: true },
-          orderBy: {
-            type: "asc",
-          },
-        }),
-        prisma.budgetRule.findFirst({
-          where: {
-            userId: existingUser.id,
-          },
-        }),
-      ]);
-
-    const currency = userSettings?.currency || "USD";
-
-    const totalFixed =
-      totalExpense.find((t) => t.type === "fixed")?._sum?.budgetAmount || 0;
-    const totalVariable =
-      totalExpense.find((t) => t.type === "variable")?._sum?.budgetAmount || 0;
-
-    const remainsBudget =
-      (totalBudget._sum.amount || 0) - totalFixed - totalVariable;
-
-    return Response.json({
-      income: totalBudget._sum.amount || 0,
-      expense: totalFixed || 0,
-      variable: totalVariable,
-      remainsBudget: remainsBudget,
-      currency,
-      budgetRules: budgetRules,
-    });
+  if (!existingUser) {
+    return Response.json({ error: "User not found" }, { status: 404 });
   }
 
-  return Response.json({ error: "User not found" }, { status: 404 });
+  const userId = existingUser.id;
+
+  // Fetch all required data in parallel
+  const [userSettings, totalBudget, expenseData, budgetRules, savingsData] =
+    await Promise.all([
+      prisma.userSettings.findUnique({ where: { id: userId } }),
+      prisma.budget.aggregate({
+        where: { userId },
+        _sum: { amount: true },
+      }),
+      prisma.fixedExpense.groupBy({
+        by: ["type"],
+        where: { userId },
+        _sum: { budgetAmount: true },
+        orderBy: { type: "asc" },
+      }),
+      prisma.budgetRule.findFirst({ where: { userId } }),
+      prisma.savings.groupBy({
+        by: ["type"],
+        where: { userId },
+        _sum: { budgetAmount: true },
+        orderBy: { type: "asc" },
+      }),
+    ]);
+
+  const currency = userSettings?.currency || "USD";
+
+  // Helper function to get sum by type
+  const getSumByType = (data: any, type: any) =>
+    data.find((item: any) => item.type === type)?._sum?.budgetAmount || 0;
+
+  const totalFixed = getSumByType(expenseData, "fixed");
+  const totalVariable = getSumByType(expenseData, "variable");
+  const totalSaving = getSumByType(savingsData, "saving");
+  const totalInvest = getSumByType(savingsData, "invest");
+
+  const income = totalBudget._sum.amount || 0;
+  const remainsBudget =
+    income - totalFixed - totalVariable - totalSaving - totalInvest;
+
+  return Response.json({
+    income,
+    expense: totalFixed,
+    variable: totalVariable,
+    remainsBudget,
+    currency,
+    budgetRules,
+    savings: totalSaving + totalInvest,
+  });
 }

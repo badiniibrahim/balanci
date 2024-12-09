@@ -26,11 +26,11 @@ const chartConfig = {
     color: "hsl(var(--chart-3))",
   },
   edge: {
-    label: "Reserve Fund",
+    label: "Savings and Investing",
     color: "hsl(var(--chart-4))",
   },
   other: {
-    label: "Savings and Investing",
+    label: "Refund",
     color: "hsl(var(--chart-5))",
   },
 } satisfies ChartConfig;
@@ -38,7 +38,7 @@ const chartConfig = {
 function BalanceChart({
   balance,
 }: {
-  balance: { income: number; expense: number; variable: number };
+  balance: { income: number; expense: number; variable: number, savings:number };
 }) {
   const chartData = [
     {
@@ -56,7 +56,7 @@ function BalanceChart({
       visitors: balance?.variable,
       fill: "var(--color-firefox)",
     },
-    { browser: "edge", visitors: 0, fill: "var(--color-edge)" },
+    { browser: "edge", visitors: balance?.savings, fill: "var(--color-edge)" },
     { browser: "other", visitors: 0, fill: "var(--color-other)" },
   ];
 

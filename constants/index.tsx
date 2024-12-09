@@ -23,6 +23,11 @@ export const sidebarLinks = [
     label: "Charges",
   },
   {
+    icon: FileText,
+    route: "/dashboard/savings",
+    label: "Savings and Investments",
+  },
+  {
     icon: Shield,
     route: "/dashboard/upgrade",
     label: "Upgrade",

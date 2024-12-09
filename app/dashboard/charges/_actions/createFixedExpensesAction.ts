@@ -31,8 +31,8 @@ export async function CreateFixedExpenses(form: FixedExpensesType) {
       },
     });
 
-    const [budget, budgetRules, totalFixedExpenses] = await prisma.$transaction(
-      [
+    const [budget, budgetRules, totalFixedExpenses, totalSavings] =
+      await prisma.$transaction([
         prisma.budget.findFirst({
           where: { clerkId: userId, userId: existingUser.id },
         }),
@@ -47,26 +47,45 @@ export async function CreateFixedExpenses(form: FixedExpensesType) {
             type: "asc",
           },
         }),
-      ]
-    );
+        prisma.savings.groupBy({
+          by: ["type"],
+          where: { clerkId: userId, userId: existingUser.id },
+          _sum: { budgetAmount: true },
+          orderBy: {
+            type: "asc",
+          },
+        }),
+      ]);
 
     if (budget && budgetRules && totalFixedExpenses) {
       const totalBudget = budget.amount;
+
       const totalFixed =
         totalFixedExpenses.find((t) => t.type === "fixed")?._sum
           ?.budgetAmount || 0;
+
       const totalVariable =
         totalFixedExpenses.find((t) => t.type === "variable")?._sum
           ?.budgetAmount || 0;
 
+      const totalSaving =
+        totalSavings.find((t) => t.type === "saving")?._sum?.budgetAmount || 0;
+
+      const totalInvest =
+        totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
+
       const total = totalFixed + totalVariable;
+
       const needsPercentage = (total / totalBudget) * 100;
+
+      const savingsPercentage =
+        ((totalSaving + totalInvest) / totalBudget) * 100;
+
       const updatedBudgetRule = await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
+          actualSavingsPercentage: savingsPercentage,
         },
         create: {
           needsPercentage: 50,
@@ -82,33 +101,6 @@ export async function CreateFixedExpenses(form: FixedExpensesType) {
 
       return updatedBudgetRule;
     }
-
-    /*if (budget && budgetRules && totalFixedExpenses._sum.budgetAmount) {
-      const totalBudget = budget.amount;
-      const totalFixed = totalFixedExpenses._sum.budgetAmount;
-      const needsPercentage = (totalFixed / totalBudget) * 100;
-
-      const updatedBudgetRule = await prisma.budgetRule.upsert({
-        where: { id: budgetRules.id },
-        update: {
-          actualNeedsPercentage: needsPercentage,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
-        },
-        create: {
-          needsPercentage: 50,
-          savingsPercentage: 30,
-          wantsPercentage: 20,
-          actualNeedsPercentage: 0,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
-          userId: existingUser.id,
-          clerkId: userId,
-        },
-      });
-
-      return updatedBudgetRule;
-    }*/
 
     throw new Error("Failed to process budget or budget rules.");
   } catch (error) {

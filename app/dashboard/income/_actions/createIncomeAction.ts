@@ -37,8 +37,8 @@ export async function CreateIncome(from: IncomeSchemaType) {
       throw new Error("Failed to create income.");
     }
 
-    const [budget, budgetRules, totalFixedExpenses] = await prisma.$transaction(
-      [
+    const [budget, budgetRules, totalFixedExpenses, totalSavings] =
+      await prisma.$transaction([
         prisma.budget.aggregate({
           where: { clerkId: userId, userId: existingUser.id },
           _sum: { amount: true },
@@ -54,11 +54,19 @@ export async function CreateIncome(from: IncomeSchemaType) {
             type: "asc",
           },
         }),
-      ]
-    );
+        prisma.savings.groupBy({
+          by: ["type"],
+          where: { clerkId: userId, userId: existingUser.id },
+          _sum: { budgetAmount: true },
+          orderBy: {
+            type: "asc",
+          },
+        }),
+      ]);
 
-    if (budget && budgetRules && totalFixedExpenses) {
+    if (budget && budgetRules && totalFixedExpenses && totalSavings) {
       const totalBudget = budget._sum.amount || 0;
+
       const totalFixed =
         totalFixedExpenses.find((t) => t.type === "fixed")?._sum
           ?.budgetAmount || 0;
@@ -66,14 +74,25 @@ export async function CreateIncome(from: IncomeSchemaType) {
         totalFixedExpenses.find((t) => t.type === "variable")?._sum
           ?.budgetAmount || 0;
 
+      const totalSaving =
+        totalSavings.find((t) => t.type === "saving")?._sum?.budgetAmount || 0;
+      const totalInvest =
+        totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
+
       const total = totalFixed + totalVariable;
+
       const needsPercentage = (total / totalBudget) * 100;
+
+      const savingsPercentage = ((totalSaving + totalInvest) / totalBudget) * 100;
+
+
+
+
       const updatedBudgetRule = await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
+          actualSavingsPercentage: savingsPercentage,
         },
         create: {
           needsPercentage: 50,

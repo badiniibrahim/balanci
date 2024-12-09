@@ -27,6 +27,7 @@ export async function DeleteFixedExpenses(id: number) {
         clerkId: userId,
       },
     });
+    //TODO : Générer le cas ou il reste un budget
 
     const [budget, budgetRules, totalFixedExpenses] = await prisma.$transaction(
       [
@@ -59,12 +60,11 @@ export async function DeleteFixedExpenses(id: number) {
 
       const total = totalFixed + totalVariable;
       const needsPercentage = (total / totalBudget) * 100;
+
       await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
         },
         create: {
           needsPercentage: 50,
@@ -78,8 +78,6 @@ export async function DeleteFixedExpenses(id: number) {
         },
       });
     }
-
-    throw new Error("Budget calculations failed.");
   } catch (error) {
     console.error("Error deleting fixed expense:", error);
     throw new Error("An error occurred while deleting the fixed expense.");

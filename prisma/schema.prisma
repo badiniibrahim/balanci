@@ -23,11 +23,12 @@ model User {
   stripeCustomerId String?
 
   // Relations
-  budgets          Budget[]
-  fixedExpenses    FixedExpense[]
-  budgetRules      BudgetRule[]
-  userSettings     UserSettings[]
-  subscription     Subscription[]
+  budgets       Budget[]
+  fixedExpenses FixedExpense[]
+  budgetRules   BudgetRule[]
+  userSettings  UserSettings[]
+  subscription  Subscription[]
+  Savings       Savings[]
 }
 
 model Subscription {
@@ -67,14 +68,28 @@ model Budget {
 }
 
 model FixedExpense {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   name         String
   dueDate      DateTime?
   budgetAmount Float
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   clerkId      String
-  type         String @default("fixed") 
+  type         String    @default("fixed")
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Savings {
+  id           Int       @id @default(autoincrement())
+  name         String
+  dueDate      DateTime?
+  budgetAmount Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  clerkId      String
+  type         String    @default("saving")
 
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -94,4 +109,3 @@ model BudgetRule {
 
   @@unique([clerkId, userId])
 }
-

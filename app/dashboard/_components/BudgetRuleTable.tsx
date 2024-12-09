@@ -50,7 +50,7 @@ function BudgetRuleTable({ balance }: { balance: any }) {
               30,00%
             </TableCell>
             <TableCell className="px-4 py-3 text-center text-sm font-medium text-emerald-500">
-              0,00%
+            {balance?.budgetRules?.actualSavingsPercentage ?? "0,00"} %
             </TableCell>
           </TableRow>
           {/* Ligne 3 */}

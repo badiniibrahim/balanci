@@ -11,6 +11,7 @@ import FixedExpenseCard from "./_components/FixedExpenseCard";
 import BudgetRuleTable from "./_components/BudgetRuleTable";
 import VariableExpenseCard from "./_components/VariableExpenseCard";
 import RemainsBudgetCard from "./_components/RemainsBudgetCard";
+import SavingsCard from "./_components/SavingsCard";
 
 function DashboardPage() {
   const { data: balance } = useQuery({
@@ -32,37 +33,17 @@ function DashboardPage() {
         <Balance balance={balance} />
         <div className="flex m-3 flex-wrap justify-center gap-5 items-center ">
           <div className="grid grid-cols-4 gap-5">
+          <RemainsBudgetCard balance={balance} />
             <FixedExpenseCard balance={balance} />
             <VariableExpenseCard balance={balance} />
-            <RemainsBudgetCard balance={balance} />
+            <SavingsCard balance={balance} />
           </div>
-          {/*earningData.map((item) => (
-            <div
-              key={item.title}
-              className="h-44 text-gray-200 bg-[#1a202c] md:w-56  p-4 pt-9 rounded-2xl "
-            >
-              <button
-                type="button"
-                style={{
-                  color: item.iconColor,
-                  backgroundColor: item.iconBg,
-                }}
-                className="text-2xl opacity-0.9 rounded-full  p-4 hover:drop-shadow-xl"
-              >
-                <item.icon />
-              </button>
-              <p className="mt-3">
-                <span className="text-lg font-semibold">{item.amount}</span>
-              </p>
-              <p className="text-sm text-gray-400  mt-1">{item.title}</p>
-            </div>
-          ))*/}
         </div>
       </div>
       <div className="flex gap-10 flex-wrap justify-center">
         <BalanceChart balance={balance} />
         <div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
             <BudgetRuleTable balance={balance} />
           </div>
 
