@@ -71,9 +71,9 @@ export function SavingsTable({ savings = [], currency }: Props) {
       cell: ({ row }) => (
         <div
           className={cn(
-            "capitalize w-[100px] rounded-full text-center px-3 py-1 text-sm",
-            row.original.type === "fixed" && "bg-green-100 text-green-600",
-            row.original.type === "variable" && "bg-red-100 text-red-600"
+            "capitalize w-[120px] rounded-full text-center px-3 py-1 text-sm font-bold",
+            row.original.type === "saving" && "bg-blue-100 text-blue-800",
+            row.original.type === "invest" && "bg-orange-100 text-orange-800"
           )}
         >
           {row.original.type}
@@ -134,11 +134,13 @@ export function SavingsTable({ savings = [], currency }: Props) {
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg text-white font-bold">Savings and Investments</h1>
-        <div className="flex gap-2">
+        <h1 className="text-xl font-bold text-white">
+          Savings and Investments
+        </h1>
+        <div className="flex gap-2 border border-white rounded-lg">
           {table.getColumn("type") && (
             <DataTableFacetedFilter
-              title="Type"
+              title="Filter by Type"
               column={table.getColumn("type")}
               options={[
                 { label: "Savings", value: "saving" },
@@ -148,16 +150,14 @@ export function SavingsTable({ savings = [], currency }: Props) {
           )}
         </div>
       </div>
-      <div className="overflow-hidden rounded-lg border border-white">
+
+      <div className="overflow-hidden rounded-lg  shadow-lg">
         <Table className="w-full">
-          <TableHeader>
+          <TableHeader className="">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="text-white font-bold">
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="p-4 text-white font-bold"
-                  >
+                  <TableHead key={header.id} className="p-4">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -174,13 +174,10 @@ export function SavingsTable({ savings = [], currency }: Props) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="hover:bg-primary/90 transition-colors"
+                  className="hover:bg-primary/90 transition-all"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="p-4 text-white font-bold"
-                    >
+                    <TableCell key={cell.id} className="p-4">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -193,9 +190,9 @@ export function SavingsTable({ savings = [], currency }: Props) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center text-gray-500 p-4"
+                  className="text-center text-white p-4"
                 >
-                  No results found.
+                  No results found. Start by adding savings or investments!
                 </TableCell>
               </TableRow>
             )}

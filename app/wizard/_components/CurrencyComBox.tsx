@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -22,11 +22,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import SkeletonWrapper from "@/components/shared/SkeletonWrapper";
 import { toast } from "sonner";
 
+// Main Component
 export function CurrencyComBox() {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selectedOption, setSelectedOption] = useState<Currency | null>(null);
 
+  // Fetch user settings
   const userSettings = useQuery({
     queryKey: ["userSettings"],
     queryFn: () =>
@@ -34,6 +36,7 @@ export function CurrencyComBox() {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       }).then((res) => res.json()),
+    staleTime: 300000, // Cache data for 5 minutes
   });
 
   useEffect(() => {
@@ -44,6 +47,7 @@ export function CurrencyComBox() {
     if (userCurrency) setSelectedOption(userCurrency);
   }, [userSettings.data]);
 
+  // Mutation to update currency
   const mutation = useMutation({
     mutationFn: async (currency: string) => {
       const res = await fetch("/api/user-settings/update", {
@@ -55,7 +59,7 @@ export function CurrencyComBox() {
       return res.json();
     },
     onSuccess: (data) => {
-      toast.success("Currency updated successfully 🥳", {
+      toast.success("Currency updated successfully 🎉", {
         id: "update-currency",
       });
       setSelectedOption(
@@ -79,6 +83,9 @@ export function CurrencyComBox() {
     [mutation]
   );
 
+  // Memoized currency options
+  const currencyOptions = useMemo(() => Currencies, []);
+
   if (isDesktop) {
     return (
       <SkeletonWrapper isLoading={userSettings.isLoading}>
@@ -86,8 +93,9 @@ export function CurrencyComBox() {
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-between items-center bg-white border-gray-300 text-gray-800" // Change text color here
+              className="w-full justify-between items-center bg-white border-gray-300 text-gray-800"
               disabled={mutation.isPending}
+              aria-label="Select currency"
             >
               {selectedOption ? (
                 <>
@@ -103,6 +111,7 @@ export function CurrencyComBox() {
             <OptionList
               setOpen={setOpen}
               setSelectedOption={handleSelectionOption}
+              options={currencyOptions}
             />
           </PopoverContent>
         </Popover>
@@ -116,8 +125,9 @@ export function CurrencyComBox() {
         <DrawerTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between items-center bg-white border-gray-300 text-gray-800" // Text color updated
+            className="w-full justify-between items-center bg-white border-gray-300 text-gray-800"
             disabled={mutation.isPending}
+            aria-label="Select currency"
           >
             {selectedOption ? (
               <>
@@ -137,6 +147,7 @@ export function CurrencyComBox() {
             <OptionList
               setOpen={setOpen}
               setSelectedOption={handleSelectionOption}
+              options={currencyOptions}
             />
           </div>
         </DrawerContent>
@@ -145,12 +156,15 @@ export function CurrencyComBox() {
   );
 }
 
+// Option List Component
 function OptionList({
   setOpen,
   setSelectedOption,
+  options,
 }: {
   setOpen: (open: boolean) => void;
   setSelectedOption: (status: Currency | null) => void;
+  options: Currency[];
 }) {
   return (
     <Command className="bg-white">
@@ -158,17 +172,17 @@ function OptionList({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
-          {Currencies.map((currency: Currency) => (
+          {options.map((currency) => (
             <CommandItem
               key={currency.value}
               value={currency.value}
               onSelect={(value) => {
                 setSelectedOption(
-                  Currencies.find((priority) => priority.value === value) ||
-                    null
+                  options.find((option) => option.value === value) || null
                 );
                 setOpen(false);
               }}
+              aria-label={`Select ${currency.label}`}
             >
               {currency.label}
             </CommandItem>
