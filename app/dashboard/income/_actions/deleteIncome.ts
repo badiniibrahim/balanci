@@ -9,10 +9,8 @@ export async function DeleteIncome(id: number) {
 
   if (!userId) {
     redirect("/sign-in");
-    return; // Arrête l'exécution après la redirection
   }
 
-  // Récupérer l'utilisateur à partir de l'id Clerk
   const existingUser = await prisma.user.findUnique({
     where: { clerkId: userId },
   });
@@ -21,7 +19,6 @@ export async function DeleteIncome(id: number) {
     throw new Error("User not found.");
   }
 
-  // Vérification de l'existence du budget avant suppression
   const existingBudget = await prisma.budget.findUnique({
     where: { id, clerkId: userId, userId: existingUser.id },
   });
@@ -30,7 +27,6 @@ export async function DeleteIncome(id: number) {
     throw new Error("Budget entry not found.");
   }
 
-  // Suppression du budget
   const deletedBudget = await prisma.budget.delete({
     where: {
       id,
@@ -43,7 +39,6 @@ export async function DeleteIncome(id: number) {
     throw new Error("Failed to delete the budget entry.");
   }
 
-  // Transactions pour récupérer les données du budget
   const [
     budget,
     budgetRules,

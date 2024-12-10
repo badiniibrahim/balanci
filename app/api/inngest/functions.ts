@@ -32,8 +32,8 @@ export const createUser = inngest.createFunction(
           await prisma.budgetRule.create({
             data: {
               needsPercentage: 50,
-              wantsPercentage: 30,
-              savingsPercentage: 20,
+              savingsPercentage: 30,
+              wantsPercentage: 20,
               actualNeedsPercentage: 0,
               actualSavingsPercentage: 0,
               actualWantsPercentage: 0,
