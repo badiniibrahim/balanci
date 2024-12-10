@@ -37,35 +37,45 @@ export async function CreateIncome(from: IncomeSchemaType) {
       throw new Error("Failed to create income.");
     }
 
-    const [budget, budgetRules, totalFixedExpenses, totalSavings] =
-      await prisma.$transaction([
-        prisma.budget.aggregate({
-          where: { clerkId: userId, userId: existingUser.id },
-          _sum: { amount: true },
-        }),
-        prisma.budgetRule.findFirst({
-          where: { clerkId: userId, userId: existingUser.id },
-        }),
-        prisma.fixedExpense.groupBy({
-          by: ["type"],
-          where: { clerkId: userId, userId: existingUser.id },
-          _sum: { budgetAmount: true },
-          orderBy: {
-            type: "asc",
-          },
-        }),
-        prisma.savings.groupBy({
-          by: ["type"],
-          where: { clerkId: userId, userId: existingUser.id },
-          _sum: { budgetAmount: true },
-          orderBy: {
-            type: "asc",
-          },
-        }),
-      ]);
+    const [
+      budget,
+      budgetRules,
+      totalFixedExpenses,
+      totalSavings,
+      totalPleasures,
+    ] = await prisma.$transaction([
+      prisma.budget.aggregate({
+        where: { clerkId: userId, userId: existingUser.id },
+        _sum: { amount: true },
+      }),
+      prisma.budgetRule.findFirst({
+        where: { clerkId: userId, userId: existingUser.id },
+      }),
+      prisma.fixedExpense.groupBy({
+        by: ["type"],
+        where: { clerkId: userId, userId: existingUser.id },
+        _sum: { budgetAmount: true },
+        orderBy: {
+          type: "asc",
+        },
+      }),
+      prisma.savings.groupBy({
+        by: ["type"],
+        where: { clerkId: userId, userId: existingUser.id },
+        _sum: { budgetAmount: true },
+        orderBy: {
+          type: "asc",
+        },
+      }),
+      prisma.pleasure.aggregate({
+        where: { clerkId: userId, userId: existingUser.id },
+        _sum: { budgetAmount: true },
+      }),
+    ]);
 
     if (budget && budgetRules && totalFixedExpenses && totalSavings) {
       const totalBudget = budget._sum.amount || 0;
+      const totalPleasure = totalPleasures._sum.budgetAmount || 0;
 
       const totalFixed =
         totalFixedExpenses.find((t) => t.type === "fixed")?._sum
@@ -83,16 +93,17 @@ export async function CreateIncome(from: IncomeSchemaType) {
 
       const needsPercentage = (total / totalBudget) * 100;
 
-      const savingsPercentage = ((totalSaving + totalInvest) / totalBudget) * 100;
+      const savingsPercentage =
+        ((totalSaving + totalInvest) / totalBudget) * 100;
 
-
-
+      const actualWantsPercentage = (totalPleasure / totalBudget) * 100;
 
       const updatedBudgetRule = await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
           actualSavingsPercentage: savingsPercentage,
+          actualWantsPercentage: actualWantsPercentage,
         },
         create: {
           needsPercentage: 50,

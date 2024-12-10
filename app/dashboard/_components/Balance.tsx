@@ -2,42 +2,33 @@
 "use client";
 
 import { DollarSign } from "lucide-react";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import CountUp from "react-countup";
 
 function Balance({ balance }: { balance: any }) {
-  const formatter = useMemo(() => {
-    return GetFormatterForCurrency(balance?.currency ?? "USD");
-  }, [balance]);
-
-  const formatFn = useCallback(
-    (value: number) => {
-      return formatter.format(value);
-    },
-    [formatter]
+  const formatter = useMemo(
+    () => GetFormatterForCurrency(balance?.currency ?? "USD"),
+    [balance]
   );
 
   return (
-    <div className=" dark:text-gray-200 bg-[hsl(var(--chart-1))] h-44 rounded-xl w-full lg:w-80 p-8 pt-9 m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center">
+    <div className="bg-[hsl(var(--chart-1))] text-gray-200 h-35 w-full lg:w-80 p-6 rounded-xl shadow-lg m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center">
       <div className="flex justify-between items-center">
         <div>
-          <p className="font-bold text-white">Total Income</p>
-          <span className="text-lg font-semibold">
-            <CountUp
-              preserveValue
-              redraw={false}
-              end={balance?.income}
-              decimal="2"
-              formattingFn={formatFn}
-              className="text-2xl"
-            />
-          </span>
+          <p className="font-bold text-white mb-1">Total Income</p>
+          <CountUp
+            preserveValue
+            redraw={false}
+            end={balance?.income || 0}
+            decimals={2}
+            formattingFn={(value) => formatter.format(value)}
+            className="text-xl font-semibold"
+          />
         </div>
         <button
           type="button"
-          style={{ backgroundColor: "red" }}
-          className="text-2xl opacity-0.9 text-white hover:drop-shadow-xl rounded-full  p-4"
+          className="text-white text-2xl bg-red-500 p-3 rounded-full hover:shadow-md"
         >
           <DollarSign />
         </button>

@@ -19,28 +19,28 @@ import {
 } from "@/components/ui/chart";
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
+  budget: {
+    label: "budget",
   },
-  chrome: {
-    label: "Chrome",
+  fixedCharges: {
+    label: "Fixed Charges",
     color: "hsl(var(--chart-2))",
   },
-  safari: {
-    label: "Safari",
+  variableCharges: {
+    label: "Variable Charges",
     color: "hsl(var(--chart-3))",
   },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
+  savings: {
+    label: "Savings and Investing",
     color: "hsl(var(--chart-4))",
   },
-  other: {
-    label: "Other",
+  debts: {
+    label: "Debts",
     color: "hsl(var(--chart-5))",
+  },
+  pleasure: {
+    label: "Pleasure",
+    color: "hsl(var(--chart-6))",
   },
 } satisfies ChartConfig;
 
@@ -48,21 +48,25 @@ function PieBalanceChart({ balance }: { balance: any }) {
   const chartData = [
     {
       browser: "Fixed Charges",
-      visitors: balance?.expense,
-      fill: "var(--color-chrome)",
+      budget: balance?.expense,
+      fill: "var(--color-fixedCharges)",
     },
     {
       browser: "Variable Charges",
-      visitors: balance?.variable,
-      fill: "var(--color-safari)",
+      budget: balance?.variable,
+      fill: "var(--color-variableCharges)",
     },
-    { browser: "firefox", visitors: 0, fill: "var(--color-firefox)" },
     {
-      browser: "Savings and Investing ",
-      visitors: balance?.savings,
-      fill: "var(--color-edge)",
+      browser: "Savings and Investing",
+      budget: balance?.savings,
+      fill: "var(--color-savings)",
     },
-    { browser: "other", visitors: balance?.debts, fill: "var(--color-other)" },
+    { browser: "Debts", budget: balance?.debts, fill: "var(--color-debts)" },
+    {
+      browser: "pleasure",
+      budget: balance?.pleasure,
+      fill: "var(--color-pleasure)",
+    },
   ];
   return (
     <Card className="flex flex-col bg-[#1a202c] border-none">
@@ -81,7 +85,7 @@ function PieBalanceChart({ balance }: { balance: any }) {
             />
             <Pie
               data={chartData}
-              dataKey="visitors"
+              dataKey="budget"
               nameKey="browser"
               innerRadius={60}
             />
@@ -91,9 +95,6 @@ function PieBalanceChart({ balance }: { balance: any }) {
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
         </div>
       </CardFooter>
     </Card>

@@ -33,36 +33,45 @@ export async function DeleteIncome(id: number) {
     throw new Error("Failed to delete the budget entry.");
   }
 
-  const [budget, budgetRules, totalFixedExpenses, totalSavings] =
-    await prisma.$transaction([
-      prisma.budget.aggregate({
-        where: { clerkId: userId, userId: existingUser.id },
-        _sum: { amount: true },
-      }),
-      prisma.budgetRule.findFirst({
-        where: { clerkId: userId, userId: existingUser.id },
-      }),
-      prisma.fixedExpense.groupBy({
-        by: ["type"],
-        where: { clerkId: userId, userId: existingUser.id },
-        _sum: { budgetAmount: true },
-        orderBy: {
-          type: "asc",
-        },
-      }),
-      prisma.savings.groupBy({
-        by: ["type"],
-        where: { clerkId: userId, userId: existingUser.id },
-        _sum: { budgetAmount: true },
-        orderBy: {
-          type: "asc",
-        },
-      }),
-    ]);
-
+  const [
+    budget,
+    budgetRules,
+    totalFixedExpenses,
+    totalSavings,
+    totalPleasures,
+  ] = await prisma.$transaction([
+    prisma.budget.aggregate({
+      where: { clerkId: userId, userId: existingUser.id },
+      _sum: { amount: true },
+    }),
+    prisma.budgetRule.findFirst({
+      where: { clerkId: userId, userId: existingUser.id },
+    }),
+    prisma.fixedExpense.groupBy({
+      by: ["type"],
+      where: { clerkId: userId, userId: existingUser.id },
+      _sum: { budgetAmount: true },
+      orderBy: {
+        type: "asc",
+      },
+    }),
+    prisma.savings.groupBy({
+      by: ["type"],
+      where: { clerkId: userId, userId: existingUser.id },
+      _sum: { budgetAmount: true },
+      orderBy: {
+        type: "asc",
+      },
+    }),
+    prisma.pleasure.aggregate({
+      where: { clerkId: userId, userId: existingUser.id },
+      _sum: { budgetAmount: true },
+    }),
+  ]);
 
   if (budget && budgetRules && totalFixedExpenses && totalSavings) {
     const totalBudget = budget._sum.amount || 0;
+    const totalPleasure = totalPleasures._sum.budgetAmount || 0;
 
     const totalFixed =
       totalFixedExpenses.find((t) => t.type === "fixed")?._sum?.budgetAmount ||
@@ -82,12 +91,14 @@ export async function DeleteIncome(id: number) {
     const actualSavingsPercentage =
       ((totalSaving + totalInvest) / totalBudget) * 100;
 
+    const actualWantsPercentage = (totalPleasure / totalBudget) * 100;
+
     await prisma.budgetRule.upsert({
       where: { id: budgetRules.id },
       update: {
         actualNeedsPercentage: needsPercentage,
         actualSavingsPercentage: actualSavingsPercentage,
-        actualWantsPercentage: 0,
+        actualWantsPercentage: actualWantsPercentage,
       },
       create: {
         needsPercentage: 50,

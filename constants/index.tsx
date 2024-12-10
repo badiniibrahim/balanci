@@ -7,6 +7,7 @@ import {
   FaRegCreditCard,
   FaRegStar,
   FaUserCircle,
+  FaGlassCheers
 } from "react-icons/fa";
 import { AiOutlineAppstore } from "react-icons/ai";
 
@@ -35,6 +36,11 @@ export const sidebarLinks = [
     icon: FaRegCreditCard,
     route: "/dashboard/debts",
     label: "Debts",
+  },
+  {
+    icon: FaGlassCheers,
+    route: "/dashboard/pleasures",
+    label: "Pleasures & reserve funds",
   },
   {
     icon: FaRegStar,

@@ -22,31 +22,42 @@ export async function GET() {
   const userId = existingUser.id;
 
   // Fetch all required data in parallel
-  const [userSettings, totalBudget, expenseData, budgetRules, savingsData, totalDebts] =
-    await Promise.all([
-      prisma.userSettings.findUnique({ where: { id: userId } }),
-      prisma.budget.aggregate({
-        where: { userId },
-        _sum: { amount: true },
-      }),
-      prisma.fixedExpense.groupBy({
-        by: ["type"],
-        where: { userId },
-        _sum: { budgetAmount: true },
-        orderBy: { type: "asc" },
-      }),
-      prisma.budgetRule.findFirst({ where: { userId } }),
-      prisma.savings.groupBy({
-        by: ["type"],
-        where: { userId },
-        _sum: { budgetAmount: true },
-        orderBy: { type: "asc" },
-      }),
-      prisma.debts.aggregate({
-        where: { userId },
-        _sum: { budgetAmount: true },
-      }),
-    ]);
+  const [
+    userSettings,
+    totalBudget,
+    expenseData,
+    budgetRules,
+    savingsData,
+    totalDebts,
+    totalPleasures,
+  ] = await Promise.all([
+    prisma.userSettings.findUnique({ where: { id: userId } }),
+    prisma.budget.aggregate({
+      where: { userId },
+      _sum: { amount: true },
+    }),
+    prisma.fixedExpense.groupBy({
+      by: ["type"],
+      where: { userId },
+      _sum: { budgetAmount: true },
+      orderBy: { type: "asc" },
+    }),
+    prisma.budgetRule.findFirst({ where: { userId } }),
+    prisma.savings.groupBy({
+      by: ["type"],
+      where: { userId },
+      _sum: { budgetAmount: true },
+      orderBy: { type: "asc" },
+    }),
+    prisma.debts.aggregate({
+      where: { userId },
+      _sum: { budgetAmount: true },
+    }),
+    prisma.pleasure.aggregate({
+      where: { userId },
+      _sum: { budgetAmount: true },
+    }),
+  ]);
 
   const currency = userSettings?.currency || "USD";
 
@@ -60,9 +71,17 @@ export async function GET() {
   const totalInvest = getSumByType(savingsData, "invest");
 
   const income = totalBudget._sum.amount || 0;
-  const totalDebt = totalDebts._sum.budgetAmount || 0
+  const totalDebt = totalDebts._sum.budgetAmount || 0;
+  const totalPleasure = totalPleasures._sum.budgetAmount || 0;
+
   const remainsBudget =
-    income - totalFixed - totalVariable - totalSaving - totalInvest - totalDebt;
+    income -
+    totalFixed -
+    totalVariable -
+    totalSaving -
+    totalInvest -
+    totalDebt -
+    totalPleasure;
 
   return Response.json({
     income,
@@ -72,6 +91,7 @@ export async function GET() {
     currency,
     budgetRules,
     savings: totalSaving + totalInvest,
-    debts:totalDebt
+    debts: totalDebt,
+    pleasure: totalPleasure,
   });
 }

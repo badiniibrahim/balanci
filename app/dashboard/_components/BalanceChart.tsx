@@ -13,25 +13,29 @@ const chartConfig = {
   visitors: {
     label: "Visitors",
   },
-  chrome: {
+  totalIncome: {
     label: "Total Income",
     color: "hsl(var(--chart-1))",
   },
-  safari: {
+  fixedCharges: {
     label: "Fixed Charges",
     color: "hsl(var(--chart-2))",
   },
-  firefox: {
+  variableCharges: {
     label: "Variable Charges",
     color: "hsl(var(--chart-3))",
   },
-  edge: {
+  savings: {
     label: "Savings and Investing",
     color: "hsl(var(--chart-4))",
   },
-  other: {
+  debts: {
     label: "Debts",
     color: "hsl(var(--chart-5))",
+  },
+  pleasure: {
+    label: "Pleasure",
+    color: "hsl(var(--chart-6))",
   },
 } satisfies ChartConfig;
 
@@ -44,26 +48,36 @@ function BalanceChart({
     variable: number;
     savings: number;
     debts: number;
+    pleasure: number;
   };
 }) {
   const chartData = [
     {
-      browser: "chrome",
+      browser: "totalIncome",
       visitors: balance?.income,
-      fill: "var(--color-chrome)",
+      fill: "var(--color-totalIncome)",
     },
     {
-      browser: "safari",
+      browser: "fixedCharges",
       visitors: balance?.expense,
-      fill: "var(--color-safari)",
+      fill: "var(--color-fixedCharges)",
     },
     {
-      browser: "firefox",
+      browser: "variableCharges",
       visitors: balance?.variable,
-      fill: "var(--color-firefox)",
+      fill: "var(--color-variableCharges)",
     },
-    { browser: "edge", visitors: balance?.savings, fill: "var(--color-edge)" },
-    { browser: "other", visitors: balance?.debts, fill: "var(--color-other)" },
+    {
+      browser: "savings",
+      visitors: balance?.savings,
+      fill: "var(--color-savings)",
+    },
+    { browser: "debts", visitors: balance?.debts, fill: "var(--color-debts)" },
+    {
+      browser: "pleasure",
+      visitors: balance?.pleasure,
+      fill: "var(--color-pleasure)",
+    },
   ];
 
   return (
