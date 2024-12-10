@@ -5,8 +5,8 @@ import { IncomeSchema, IncomeSchemaType } from "@/schema/income";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-export async function CreateIncome(from: IncomeSchemaType) {
-  const { success, data } = IncomeSchema.safeParse(from);
+export async function CreateIncome(form: IncomeSchemaType) {
+  const { success, data } = IncomeSchema.safeParse(form);
   if (!success) {
     throw new Error("Invalid form data.");
   }
@@ -43,6 +43,7 @@ export async function CreateIncome(from: IncomeSchemaType) {
       totalFixedExpenses,
       totalSavings,
       totalPleasures,
+      totalDets
     ] = await prisma.$transaction([
       prisma.budget.aggregate({
         where: { clerkId: userId, userId: existingUser.id },
@@ -71,11 +72,22 @@ export async function CreateIncome(from: IncomeSchemaType) {
         where: { clerkId: userId, userId: existingUser.id },
         _sum: { budgetAmount: true },
       }),
+      prisma.debts.aggregate({
+        where: { clerkId: userId, userId: existingUser.id },
+        _sum: { budgetAmount: true },
+      }),
     ]);
 
-    if (budget && budgetRules && totalFixedExpenses && totalSavings) {
+    if (
+      budget &&
+      budgetRules &&
+      totalFixedExpenses &&
+      totalSavings &&
+      totalPleasures
+    ) {
       const totalBudget = budget._sum.amount || 0;
       const totalPleasure = totalPleasures._sum.budgetAmount || 0;
+      const totaltotalDet = totalDets._sum.budgetAmount || 0;
 
       const totalFixed =
         totalFixedExpenses.find((t) => t.type === "fixed")?._sum
@@ -90,13 +102,17 @@ export async function CreateIncome(from: IncomeSchemaType) {
         totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
 
       const total = totalFixed + totalVariable;
+      const totalSavingInvestDebts = totalSaving + totalInvest + totaltotalDet;
 
-      const needsPercentage = (total / totalBudget) * 100;
+      const needsPercentage = totalBudget ? (total / totalBudget) * 100 : 0;
 
-      const savingsPercentage =
-        ((totalSaving + totalInvest) / totalBudget) * 100;
+      const savingsPercentage = totalBudget
+        ? (totalSavingInvestDebts / totalBudget) * 100
+        : 0;
 
-      const actualWantsPercentage = (totalPleasure / totalBudget) * 100;
+      const actualWantsPercentage = totalBudget
+        ? (totalPleasure / totalBudget) * 100
+        : 0;
 
       const updatedBudgetRule = await prisma.budgetRule.upsert({
         where: { id: budgetRules.id },

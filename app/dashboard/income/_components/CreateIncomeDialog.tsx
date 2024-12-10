@@ -85,7 +85,6 @@ function CreateIncomeDialog({ trigger }: Props) {
                   <FormItem>
                     <FormLabel className="flex gap-1 items-center">
                       Name
-                      <p className="text-sm text-primary">(required)</p>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="name" {...field} />
@@ -101,7 +100,6 @@ function CreateIncomeDialog({ trigger }: Props) {
                   <FormItem>
                     <FormLabel className="flex gap-1 items-center">
                       Amount
-                      <p className="text-sm text-primary">(required)</p>
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="amount" {...field} />

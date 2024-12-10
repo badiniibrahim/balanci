@@ -9,8 +9,10 @@ export async function DeleteIncome(id: number) {
 
   if (!userId) {
     redirect("/sign-in");
+    return; // Arrête l'exécution après la redirection
   }
 
+  // Récupérer l'utilisateur à partir de l'id Clerk
   const existingUser = await prisma.user.findUnique({
     where: { clerkId: userId },
   });
@@ -19,8 +21,16 @@ export async function DeleteIncome(id: number) {
     throw new Error("User not found.");
   }
 
-  console.log({ id, existingUser });
+  // Vérification de l'existence du budget avant suppression
+  const existingBudget = await prisma.budget.findUnique({
+    where: { id, clerkId: userId, userId: existingUser.id },
+  });
 
+  if (!existingBudget) {
+    throw new Error("Budget entry not found.");
+  }
+
+  // Suppression du budget
   const deletedBudget = await prisma.budget.delete({
     where: {
       id,
@@ -33,12 +43,14 @@ export async function DeleteIncome(id: number) {
     throw new Error("Failed to delete the budget entry.");
   }
 
+  // Transactions pour récupérer les données du budget
   const [
     budget,
     budgetRules,
     totalFixedExpenses,
     totalSavings,
     totalPleasures,
+    totalDets
   ] = await prisma.$transaction([
     prisma.budget.aggregate({
       where: { clerkId: userId, userId: existingUser.id },
@@ -67,11 +79,18 @@ export async function DeleteIncome(id: number) {
       where: { clerkId: userId, userId: existingUser.id },
       _sum: { budgetAmount: true },
     }),
+    prisma.debts.aggregate({
+      where: { clerkId: userId, userId: existingUser.id },
+      _sum: { budgetAmount: true },
+    }),
   ]);
 
-  if (budget && budgetRules && totalFixedExpenses && totalSavings) {
+  // Si les données nécessaires existent, calculs et mise à jour des règles
+  if (budget && budgetRules && totalFixedExpenses && totalSavings && totalPleasures) {
     const totalBudget = budget._sum.amount || 0;
     const totalPleasure = totalPleasures._sum.budgetAmount || 0;
+    const totaltotalDet = totalDets._sum.budgetAmount || 0;
+
 
     const totalFixed =
       totalFixedExpenses.find((t) => t.type === "fixed")?._sum?.budgetAmount ||
@@ -86,13 +105,16 @@ export async function DeleteIncome(id: number) {
       totalSavings.find((t) => t.type === "invest")?._sum?.budgetAmount || 0;
 
     const total = totalFixed + totalVariable;
+    const totalSavingInvestDebts = totalSaving + totalInvest + totaltotalDet;
 
-    const needsPercentage = (total / totalBudget) * 100;
+
+    // Calcul des pourcentages
+    const needsPercentage = totalBudget ? (total / totalBudget) * 100 : 0;
     const actualSavingsPercentage =
-      ((totalSaving + totalInvest) / totalBudget) * 100;
+      totalBudget ? (totalSavingInvestDebts / totalBudget) * 100 : 0;
+    const actualWantsPercentage = totalBudget ? (totalPleasure / totalBudget) * 100 : 0;
 
-    const actualWantsPercentage = (totalPleasure / totalBudget) * 100;
-
+    // Mise à jour ou création des règles de budget
     await prisma.budgetRule.upsert({
       where: { id: budgetRules.id },
       update: {
@@ -111,5 +133,7 @@ export async function DeleteIncome(id: number) {
         clerkId: userId,
       },
     });
+  } else {
+    throw new Error("Budget calculations failed or missing data.");
   }
 }
