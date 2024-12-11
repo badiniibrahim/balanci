@@ -24,18 +24,16 @@ import {
 import { useDeleteMutation } from "@/hooks/useDeleteMutation";
 import { useMemo, useState } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
-import { Savings } from "@prisma/client";
-import { cn } from "@/lib/utils";
+import { Pleasure } from "@prisma/client";
 import { DataTableColumnHeader } from "../../charges/_components/dataTable/ColumnHeader";
-import { DeleteSavings } from "../_actions/deleteSavings";
-import { DataTableFacetedFilter } from "../../charges/_components/dataTable/FacetedFilter";
+import { DeletePleasure } from "../_actions/deletePleasure";
 
 type Props = {
-  savings: Savings[];
+  pleasure: Pleasure[];
   currency: string;
 };
 
-export function SavingsTable({ savings = [], currency }: Props) {
+export function PleasuresTable({ pleasure = [], currency }: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -44,12 +42,12 @@ export function SavingsTable({ savings = [], currency }: Props) {
   }, [currency]);
 
   const deleteMutation = useDeleteMutation(
-    "savings",
-    DeleteSavings,
-    "fetchSavings"
+    "pleasure",
+    DeletePleasure,
+    "fetchPleasure"
   );
 
-  const columns: ColumnDef<Savings>[] = [
+  const columns: ColumnDef<Pleasure>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -63,23 +61,7 @@ export function SavingsTable({ savings = [], currency }: Props) {
         <div className="text-white font-bold">{row.original.name}</div>
       ),
     },
-    {
-      accessorKey: "type",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Type" />
-      ),
-      cell: ({ row }) => (
-        <div
-          className={cn(
-            "capitalize w-[120px] rounded-full text-center px-3 py-1 text-sm font-bold",
-            row.original.type === "saving" && "bg-blue-100 text-blue-800",
-            row.original.type === "invest" && "bg-orange-100 text-orange-800"
-          )}
-        >
-          {row.original.type}
-        </div>
-      ),
-    },
+
     {
       accessorKey: "createdAt",
       header: "Date",
@@ -107,13 +89,14 @@ export function SavingsTable({ savings = [], currency }: Props) {
         </p>
       ),
     },
+
     {
       accessorKey: "Actions",
       cell: ({ row }) => (
         <DialogAction
           entityName={row.original.name}
           entityId={row.original.id}
-          entityType="savings"
+          entityType="pleasure"
           deleteMutation={deleteMutation}
         />
       ),
@@ -121,7 +104,7 @@ export function SavingsTable({ savings = [], currency }: Props) {
   ];
 
   const table = useReactTable({
-    data: savings || [],
+    data: pleasure || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: { sorting, columnFilters },
@@ -134,30 +117,20 @@ export function SavingsTable({ savings = [], currency }: Props) {
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-white">
-          Savings and Investments
+        <h1 className="text-lg text-white font-bold">
+          Pleasures and reserve funds
         </h1>
-        <div className="flex gap-2 border border-white rounded-lg">
-          {table.getColumn("type") && (
-            <DataTableFacetedFilter
-              title="Filter by Type"
-              column={table.getColumn("type")}
-              options={[
-                { label: "Savings", value: "saving" },
-                { label: "Investments", value: "invest" },
-              ]}
-            />
-          )}
-        </div>
       </div>
-
       <div className="overflow-hidden rounded-lg  shadow-lg">
         <Table className="w-full">
-          <TableHeader className="">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="text-white font-bold">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="p-4">
+                  <TableHead
+                    key={header.id}
+                    className="p-4 text-white font-bold"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -174,10 +147,13 @@ export function SavingsTable({ savings = [], currency }: Props) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="hover:bg-primary/90 transition-all"
+                  className="hover:bg-primary/90 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-4">
+                    <TableCell
+                      key={cell.id}
+                      className="p-4 text-white font-bold"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -190,9 +166,9 @@ export function SavingsTable({ savings = [], currency }: Props) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center text-white p-4"
+                  className="text-center text-gray-500 p-4"
                 >
-                  No results found. Start by adding savings or investments!
+                  No results found.
                 </TableCell>
               </TableRow>
             )}

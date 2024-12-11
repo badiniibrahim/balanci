@@ -24,16 +24,18 @@ import {
 import { useDeleteMutation } from "@/hooks/useDeleteMutation";
 import { useMemo, useState } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
-import { Pleasure } from "@prisma/client";
-import { DataTableColumnHeader } from "../../charges/_components/dataTable/ColumnHeader";
-import { DeletePleasure } from "../_actions/deletePleasure";
+import { DeleteFixedExpenses } from "../_actions/deleteFixedExpenses";
+import { FixedExpense } from "@prisma/client";
+import { DataTableColumnHeader } from "./dataTable/ColumnHeader";
+import { cn } from "@/lib/utils";
+import { DataTableFacetedFilter } from "./dataTable/FacetedFilter";
 
 type Props = {
-  pleasure: Pleasure[];
+  fixedExpenses: FixedExpense[];
   currency: string;
 };
 
-export function PleasuresTable({ pleasure = [], currency }: Props) {
+export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -42,12 +44,12 @@ export function PleasuresTable({ pleasure = [], currency }: Props) {
   }, [currency]);
 
   const deleteMutation = useDeleteMutation(
-    "pleasure",
-    DeletePleasure,
-    "fetchPleasure"
+    "fixed expenses",
+    DeleteFixedExpenses,
+    "fetchFixedExpenses"
   );
 
-  const columns: ColumnDef<Pleasure>[] = [
+  const columns: ColumnDef<FixedExpense>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -62,6 +64,23 @@ export function PleasuresTable({ pleasure = [], currency }: Props) {
       ),
     },
 
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
+      ),
+      cell: ({ row }) => (
+        <div
+          className={cn(
+            "capitalize w-[100px] rounded-full text-center px-3 py-1 text-sm",
+            row.original.type === "fixed" && "bg-green-100 text-green-600",
+            row.original.type === "variable" && "bg-red-100 text-red-600"
+          )}
+        >
+          {row.original.type}
+        </div>
+      ),
+    },
     {
       accessorKey: "createdAt",
       header: "Date",
@@ -89,14 +108,13 @@ export function PleasuresTable({ pleasure = [], currency }: Props) {
         </p>
       ),
     },
-
     {
       accessorKey: "Actions",
       cell: ({ row }) => (
         <DialogAction
           entityName={row.original.name}
           entityId={row.original.id}
-          entityType="pleasure"
+          entityType="income"
           deleteMutation={deleteMutation}
         />
       ),
@@ -104,7 +122,7 @@ export function PleasuresTable({ pleasure = [], currency }: Props) {
   ];
 
   const table = useReactTable({
-    data: pleasure || [],
+    data: fixedExpenses || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: { sorting, columnFilters },
@@ -117,20 +135,30 @@ export function PleasuresTable({ pleasure = [], currency }: Props) {
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg text-white font-bold">
-          Pleasures and reserve funds
-        </h1>
+        <h1 className="text-lg text-white font-bold">Expenses</h1>
+        <div className="flex gap-2">
+          {table.getColumn("type") && (
+            <DataTableFacetedFilter
+              title="Type"
+              column={table.getColumn("type")}
+              options={[
+                { label: "Variable", value: "variable" },
+                { label: "Fixed", value: "fixed" },
+              ]}
+            />
+          )}
+        </div>
       </div>
-      <div className="overflow-hidden rounded-lg border border-white">
+      <div className="overflow-hidden rounded-lg  shadow-lg">
         <Table className="w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="text-white font-bold">
+              <TableRow
+                key={headerGroup.id}
+                className="text-white font-bold"
+              >
                 {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="p-4 text-white font-bold"
-                  >
+                  <TableHead key={header.id} className="p-4 text-white font-bold">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -150,10 +178,7 @@ export function PleasuresTable({ pleasure = [], currency }: Props) {
                   className="hover:bg-primary/90 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="p-4 text-white font-bold"
-                    >
+                    <TableCell key={cell.id} className="p-4 text-white font-bold">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

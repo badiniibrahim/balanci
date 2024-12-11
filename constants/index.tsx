@@ -14,42 +14,42 @@ import { AiOutlineAppstore } from "react-icons/ai";
 export const sidebarLinks = [
   {
     icon: AiOutlineAppstore,
-    route: "/dashboard",
+    route: "/main",
     label: "Dashboard",
   },
   {
     icon: FaDollarSign,
-    route: "/dashboard/income",
+    route: "/income",
     label: "Income",
   },
   {
     icon: FaFileInvoice,
-    route: "/dashboard/charges",
+    route: "/charges",
     label: "Charges",
   },
   {
     icon: FaPiggyBank,
-    route: "/dashboard/savings",
+    route: "/savings",
     label: "Savings and Investments",
   },
   {
     icon: FaRegCreditCard,
-    route: "/dashboard/debts",
+    route: "/debts",
     label: "Debts",
   },
   {
     icon: FaGlassCheers,
-    route: "/dashboard/pleasures",
+    route: "/pleasures",
     label: "Pleasures & reserve funds",
   },
   {
     icon: FaRegStar,
-    route: "/dashboard/upgrade",
+    route: "/upgrade",
     label: "Upgrade",
   },
   {
     icon: FaUserCircle,
-    route: "/dashboard/profile",
+    route: "/profile",
     label: "Profile",
   },
 ];

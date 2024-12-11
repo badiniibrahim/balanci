@@ -24,18 +24,16 @@ import {
 import { useDeleteMutation } from "@/hooks/useDeleteMutation";
 import { useMemo, useState } from "react";
 import { GetFormatterForCurrency } from "@/lib/helpers";
-import { DeleteFixedExpenses } from "../_actions/deleteFixedExpenses";
-import { FixedExpense } from "@prisma/client";
-import { DataTableColumnHeader } from "./dataTable/ColumnHeader";
-import { cn } from "@/lib/utils";
-import { DataTableFacetedFilter } from "./dataTable/FacetedFilter";
+import { Debts } from "@prisma/client";
+import { DeleteDebts } from "../_actions/deleteDebts";
+import { DataTableColumnHeader } from "../../charges/_components/dataTable/ColumnHeader";
 
 type Props = {
-  fixedExpenses: FixedExpense[];
+  debts: Debts[];
   currency: string;
 };
 
-export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
+export function DebtsTable({ debts = [], currency }: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -43,39 +41,23 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
     return GetFormatterForCurrency(currency);
   }, [currency]);
 
-  const deleteMutation = useDeleteMutation(
-    "fixed expenses",
-    DeleteFixedExpenses,
-    "fetchFixedExpenses"
-  );
+  const deleteMutation = useDeleteMutation("debts", DeleteDebts, "fetchDebts");
 
-  const columns: ColumnDef<FixedExpense>[] = [
+  const columns: ColumnDef<Debts>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" className="text-white font-bold"/>
+        <DataTableColumnHeader
+          column={column}
+          title="Name"
+          className="text-white font-bold"
+        />
       ),
       cell: ({ row }) => (
         <div className="text-white font-bold">{row.original.name}</div>
       ),
     },
-    {
-      accessorKey: "type",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Type" />
-      ),
-      cell: ({ row }) => (
-        <div
-          className={cn(
-            "capitalize w-[100px] rounded-full text-center px-3 py-1 text-sm",
-            row.original.type === "fixed" && "bg-green-100 text-green-600",
-            row.original.type === "variable" && "bg-red-100 text-red-600"
-          )}
-        >
-          {row.original.type}
-        </div>
-      ),
-    },
+
     {
       accessorKey: "createdAt",
       header: "Date",
@@ -103,13 +85,26 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
         </p>
       ),
     },
+
+    {
+      accessorKey: "remainsToBePaid",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Remains ToBe Paid" />
+      ),
+      cell: ({ row }) => (
+        <p className="text-white font-bold">
+          {formatter.format(row.original.remainsToBePaid)}
+        </p>
+      ),
+    },
+
     {
       accessorKey: "Actions",
       cell: ({ row }) => (
         <DialogAction
           entityName={row.original.name}
           entityId={row.original.id}
-          entityType="income"
+          entityType="debts"
           deleteMutation={deleteMutation}
         />
       ),
@@ -117,7 +112,7 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
   ];
 
   const table = useReactTable({
-    data: fixedExpenses || [],
+    data: debts || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: { sorting, columnFilters },
@@ -130,30 +125,19 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg text-white font-bold">Expenses</h1>
-        <div className="flex gap-2">
-          {table.getColumn("type") && (
-            <DataTableFacetedFilter
-              title="Type"
-              column={table.getColumn("type")}
-              options={[
-                { label: "Variable", value: "variable" },
-                { label: "Fixed", value: "fixed" },
-              ]}
-            />
-          )}
-        </div>
+        <h1 className="text-lg text-white font-bold">Debts</h1>
+        
       </div>
-      <div className="overflow-hidden rounded-lg border border-white">
+      <div className="overflow-hidden rounded-lg  shadow-lg">
         <Table className="w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="text-white font-bold"
-              >
+              <TableRow key={headerGroup.id} className="text-white font-bold">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="p-4 text-white font-bold">
+                  <TableHead
+                    key={header.id}
+                    className="p-4 text-white font-bold"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -173,7 +157,10 @@ export function FixedExpensesTable({ fixedExpenses = [], currency }: Props) {
                   className="hover:bg-primary/90 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-4 text-white font-bold">
+                    <TableCell
+                      key={cell.id}
+                      className="p-4 text-white font-bold"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

@@ -5,12 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { FaPiggyBank, FaRegCreditCard, FaGlassCheers } from "react-icons/fa";
 import { CreditCard, BarChart } from "lucide-react";
 
-import Balance from "./_components/Balance";
-import BalanceChart from "./_components/BalanceChart";
-import PieBalanceChart from "./_components/PieBalanceChart";
-import BudgetRuleTable from "./_components/BudgetRuleTable";
-import ExpenseCard from "./_components/ExpenseCard";
 import { GetFormatterForCurrency } from "@/lib/helpers";
+import ExpenseCard from "../_components/ExpenseCard";
+import Balance from "../_components/Balance";
+import BalanceChart from "../_components/BalanceChart";
+import BudgetRuleTable from "../_components/BudgetRuleTable";
+import PieBalanceChart from "../_components/PieBalanceChart";
 
 function DashboardPage() {
   const {
